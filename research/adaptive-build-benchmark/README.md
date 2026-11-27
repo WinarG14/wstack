@@ -51,7 +51,7 @@ Scores come from [`score_arm.mjs`](score_arm.mjs), a Playwright script that chec
 
 ### Token and cost detail
 
-Tokens come from the session logs of all 12 child runs (Claude, Codex and Antigravity transcripts). Dollar figures are those tokens multiplied by public API list rates. They are not invoices.
+Tokens come from the session logs of every child run (Claude, Codex and Antigravity transcripts). Dollar figures are those tokens multiplied by public API list rates. They are not invoices.
 
 | Arm | Part | Uncached in | Cache read | Cache write | Out | Total | USD |
 |---|---|---:|---:|---:|---:|---:|---:|
