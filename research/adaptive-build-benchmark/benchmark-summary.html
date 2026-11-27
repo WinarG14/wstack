@@ -1,0 +1,72 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>adaptive-build benchmark</title>
+<style>
+:root{--surface:#ffffff;--page:#f9f9f9;--ink:#191919;--ink2:#666666;--grid:#e6e6e6;
+--s1:#257de0;--s2:#f47230;--s3:#00b894;--cost:#2370cd;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);width:1200px;padding:32px}
+.card{background:var(--surface);border:1px solid #e3e3e3;border-radius:12px;padding:28px 32px}
+h1{font-size:24px;font-weight:700;line-height:1.25}
+.sub{font-size:14px;color:var(--ink2);margin-top:6px}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;margin-top:26px}
+h2{font-size:15px;font-weight:600;margin-bottom:4px}
+.h2sub{font-size:12px;color:var(--ink2);margin-bottom:14px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin-bottom:14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.row{display:grid;grid-template-columns:150px 1fr 64px;align-items:center;gap:12px;margin-bottom:14px}
+.lbl{font-size:13px;line-height:1.25}
+.lbl b{font-weight:700}
+.lbl small{display:block;color:var(--ink2);font-size:11px}
+.track{position:relative;height:30px;display:flex;gap:2px}
+.seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.seg:last-child{border-radius:0 4px 4px 0}
+.ghost{height:100%;border:1.5px dashed #c9c9c9;border-left:none;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink2)}
+.val{font-size:14px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:30px;background:var(--cost);border-radius:0 4px 4px 0}
+.note{font-size:11px;color:var(--ink2);margin-left:8px;white-space:nowrap}
+.axis{display:grid;grid-template-columns:150px 1fr 64px;gap:12px;font-size:11px;color:var(--ink2)}
+.axis div:nth-child(2){display:flex;justify-content:space-between;border-top:1px solid var(--grid);padding-top:4px}
+.find{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.f{background:#f6f8fb;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.4}
+.f b{display:block;font-size:20px;margin-bottom:2px}
+.foot{margin-top:18px;font-size:11px;color:var(--ink2);line-height:1.5}
+</style></head><body>
+<div class="card">
+  <h1>/adaptive-build fixed all 12 planted bugs, at the cost of using no skill</h1>
+  <div class="sub">Benchmark on 25 Nov 2026: one small expense app with 12 planted defects, three ways to fix it, one run each</div>
+
+  <div class="grid">
+    <div>
+      <h2>Defects fixed, out of 12</h2>
+      <div class="h2sub">Scored by a Playwright script on the running app</div>
+      <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Logic / API</span><span><i class="sw" style="background:var(--s2)"></i>Layout</span><span><i class="sw" style="background:var(--s3)"></i>Unstated UX</span><span><i class="sw" style="border:1.5px dashed #c9c9c9"></i>Missed</span></div>
+      <div class="row"><div class="lbl">No skill<small>1 Gemini agent</small></div>
+        <div class="track"><div class="seg" style="width:33.33%;background:var(--s1)">4</div><div class="seg" style="width:25%;background:var(--s2)">3</div><div class="seg" style="width:25%;background:var(--s3)">3</div><div class="ghost" style="width:16.67%">2 missed</div></div><div class="val">10</div></div>
+      <div class="row"><div class="lbl"><b>/adaptive-build</b><small>Tier 2</small></div>
+        <div class="track"><div class="seg" style="width:33.33%;background:var(--s1)">4</div><div class="seg" style="width:33.33%;background:var(--s2)">4</div><div class="seg" style="width:33.33%;background:var(--s3)">4</div></div><div class="val">12</div></div>
+      <div class="row"><div class="lbl">3-model council<small>Opus + GPT + Gemini</small></div>
+        <div class="track"><div class="seg" style="width:33.33%;background:var(--s1)">4</div><div class="seg" style="width:25%;background:var(--s2)">3</div><div class="seg" style="width:25%;background:var(--s3)">3</div><div class="ghost" style="width:16.67%">2 missed</div></div><div class="val">10</div></div>
+    </div>
+
+    <div>
+      <h2>Cost, USD</h2>
+      <div class="h2sub">Measured tokens × public API list rates</div>
+      <div class="legend" style="visibility:hidden"><span>.</span></div>
+      <div class="row" style="grid-template-columns:110px 1fr 56px"><div class="lbl">No skill</div><div style="display:flex;align-items:center"><div class="bar" style="width:22%"></div></div><div class="val">1.51</div></div>
+      <div class="row" style="grid-template-columns:110px 1fr 56px"><div class="lbl"><b>/adaptive-build</b></div><div style="display:flex;align-items:center"><div class="bar" style="width:22.3%"></div></div><div class="val">1.53</div></div>
+      <div class="row" style="grid-template-columns:110px 1fr 56px"><div class="lbl">3-model council</div><div style="display:flex;align-items:center"><div class="bar" style="width:90%"></div></div><div class="val">6.19+</div></div>
+      <div class="h2sub" style="margin-top:2px">Council cost covers rounds 1 and 2 only; it was not finished.</div>
+    </div>
+  </div>
+
+  <div class="find">
+    <div class="f"><b>0 of 6</b>static reviews by 3 flagship models saw 7 buttons pushed off screen on mobile</div>
+    <div class="f"><b>4 seconds</b>for the free layout check in /adaptive-build to find them, plus raw DB IDs on screen</div>
+    <div class="f"><b>~4x cheaper</b>than the council, with 0 new bugs (the council added 1 blocker)</div>
+  </div>
+
+  <div class="foot">Limits: one run per approach, one practice app; 5 of the 12 checks use the skill's own layout script.<br>
+  Source and full data: github.com/WinarG14/wstack/tree/main/research/adaptive-build-benchmark</div>
+</div>
+</body></html>

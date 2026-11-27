@@ -34,6 +34,8 @@ Good skill packs exist. The hard part is knowing **which one to run, and when to
 
 We ran one fault-seeded benchmark: a small expense app with 12 planted defects (4 logic/API, 4 layout, 4 unstated UX). Full write-up, per-seat token table and limits: [`research/adaptive-build-benchmark/`](research/adaptive-build-benchmark/README.md).
 
+![Benchmark summary: /adaptive-build fixed 12 of 12 planted bugs at USD 1.53; no skill and the 3-model council each fixed 10](research/adaptive-build-benchmark/benchmark-summary.png)
+
 | | No skill | `/adaptive-build` (Tier 2) | Full 3-model `/council` |
 |---|---|---|---|
 | Defects fixed | 10 / 12 | **12 / 12** | 10 / 12 |
@@ -43,28 +45,33 @@ We ran one fault-seeded benchmark: a small expense app with 12 planted defects (
 
 The short version: the same cost as no skill, all 12 fixed, and about 4x cheaper than the council. Six flagship static reviews missed 7 buttons off screen on mobile and raw DB IDs in the UI. The USD 0 DOM check found both in 4 seconds.
 
-One run per arm, one synthetic app, and 5 of the 12 checks use the skill's own geometry script. Read the [limits](research/adaptive-build-benchmark/README.md#limits-read-before-you-quote-the-numbers) before you quote it.
+Caveats: one run per arm on one synthetic app. 5 of the 12 checks use the skill's own geometry script. The `/adaptive-build` cost leaves out its parent session, and that run skipped `ponytail-review` and `/pstack:how`. Read the [limits](research/adaptive-build-benchmark/README.md#limits-read-before-you-quote-the-numbers) before you quote it.
 
 ## Install
 
 ```bash
 git clone https://github.com/WinarG14/wstack
 cp -R wstack/skills/* ~/.claude/skills/   # Claude Code
-cp -R wstack/skills/* ~/.codex/skills/    # Codex (change the ~/.claude/skills paths in SKILL.md)
-npm i -g playwright && npx playwright install chromium   # for the UI layers
+cp -R wstack/skills/* ~/.codex/skills/    # Codex
+# UI layers only: Playwright, globally or in your project
+npm i -g playwright && npx playwright install chromium
 ```
+
+`load_playwright.mjs` finds Playwright in the current project, `NODE_PATH`, or the global npm root. It uses Playwright's Chromium, or your installed Chrome if Chromium is not downloaded.
 
 ## Requirements
 
-`adaptive-build` conducts other skills. It does not copy them. Install the ones you want it to call:
+**Works on its own:** the triage script, Layer 1 (layout check) and the Layer 2/3 critic rubric. These need only `python3`, `git`, `node` and Playwright.
+
+**Calls other skills by name.** `adaptive-build` conducts them. It does not copy them. Install the ones you want:
 
 - [ponytail](https://github.com/DietrichGebert/ponytail): `ponytail`, `ponytail-review`
 - [tstack](https://github.com/t3dotgg/tstack): `council`, `sol-loop`
 - [pstack](https://github.com/cursor/plugins/tree/main/pstack): `how`, `why`, `architect`, `statechart`, `blast-radius`, `interrogate`, `reframe`, `sharpen`, `figure-it-out`, `correct`, `benchmark-checklist`
-- `python3` and `git` for the triage script. `node` + Playwright for Layer 1.
+- Optional, for visual craft: [taste-skill](https://github.com/leonxlnx/taste-skill) (`design-taste-frontend`) or any UI review skill
 - For the councils: a harness that can run models from other providers. [T3 Code](https://github.com/pingdotgg/t3code) does this with `delegate_task`.
 
-If a skill is missing, the tier table still tells the agent what job to do, so it can do the job by hand.
+If one is missing, the skill still runs. The triage output ends with a `Not installed:` line, and `SKILL.md` has a fallback row for each skill (for example: no `sol-loop` means one fresh reviewer from another model family, 2 rounds at most). The agent must say in its report which fallbacks it used. The full tier flow works best with all three packs installed.
 
 ## Make it yours
 

@@ -4,13 +4,12 @@
  * Usage: node score_arm.mjs --arm-dir <path> --port <port> --out <evidence_dir>
  */
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { createRequire } from 'node:module';
 
-const require = createRequire(import.meta.url);
-const { chromium } = require('playwright'); // npm i playwright (or set NODE_PATH)
+import { loadPlaywright, launchChromium } from '../../skills/adaptive-build/scripts/load_playwright.mjs';
+
+const { chromium } = loadPlaywright();
 const ORACLE_JS = fs.readFileSync(new URL('../../skills/adaptive-build/scripts/ui_geometry_audit.js', import.meta.url), 'utf8');
 
 function parseArgs(argv) {
@@ -59,8 +58,7 @@ async function main() {
 
   try {
     await waitServer(url);
-    const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-    browser = await chromium.launch({ headless: true, executablePath: fs.existsSync(chromePath) ? chromePath : undefined });
+    browser = await launchChromium(chromium);
 
     // --- Visual / DOM Geometry checks on Desktop (1440x900) and Mobile (390x844) ---
     const desktopCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -69,14 +67,14 @@ async function main() {
     await page.waitForTimeout(450);
 
     await page.screenshot({ path: path.join(outDir, '1440x900-final.png'), fullPage: true });
-    const auditDesktop = await page.evaluate((src) => eval(src)(document.body, {}), ORACLE_JS);
+    const auditDesktop = await page.evaluate(`(${ORACLE_JS})(document.body, {})`);
 
     const mobileCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const mPage = await mobileCtx.newPage();
     await mPage.goto(url, { waitUntil: 'networkidle' });
     await mPage.waitForTimeout(450);
     await mPage.screenshot({ path: path.join(outDir, '390x844-final.png'), fullPage: true });
-    const auditMobile = await mPage.evaluate((src) => eval(src)(document.body, {}), ORACLE_JS);
+    const auditMobile = await mPage.evaluate(`(${ORACLE_JS})(document.body, {})`);
     await mobileCtx.close();
 
     // V1: Dead whitespace / invisible height reservation

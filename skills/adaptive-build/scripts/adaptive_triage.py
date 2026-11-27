@@ -62,9 +62,25 @@ def run_git(repo: Path, args: List[str]) -> Tuple[int, str]:
             text=True,
             timeout=15,
         )
-        return proc.returncode, proc.stdout.strip()
+        return proc.returncode, proc.stdout.rstrip("\r\n")
     except Exception as exc:
         return 2, str(exc)
+
+
+SKILL_ROOTS = [Path.home() / d for d in (".claude/skills", ".codex/skills", ".agents/skills")]
+PLUGIN_ROOT = Path.home() / ".claude/plugins"
+EXPECTED_SKILLS = ("ponytail", "ponytail-review", "sol-loop", "council")
+
+
+def missing_skills() -> List[str]:
+    """Best-effort, zero-token check for the skills this orchestrator calls by name."""
+    missing = [s for s in EXPECTED_SKILLS if not any((root / s).exists() for root in SKILL_ROOTS)]
+    has_pstack = any((root / "how").exists() for root in SKILL_ROOTS)
+    if not has_pstack and PLUGIN_ROOT.is_dir():
+        has_pstack = any(PLUGIN_ROOT.glob("*/*/pstack/skills/how")) or any(PLUGIN_ROOT.glob("*/*/pstack/*/skills/how"))
+    if not has_pstack:
+        missing.append("pstack")
+    return missing
 
 
 def is_test_or_doc(path: str) -> bool:
@@ -86,7 +102,7 @@ def module_bucket(rel_path: str) -> str:
     parts = [p for p in rel_path.replace("\\", "/").split("/") if p]
     if not parts:
         return "root"
-    if parts[0] in ("src", "app", "packages", "apps", "services", "internal", "pkg") and len(parts) >= 2:
+    if parts[0] in ("src", "app", "packages", "apps", "services", "internal", "pkg") and len(parts) >= 3:
         return "/".join(parts[:2])
     return parts[0] if len(parts) > 1 else "root"
 
@@ -106,27 +122,31 @@ def detect_default_base(repo: Path, explicit_base: str) -> str:
     return ""
 
 
-def get_changed_files(repo: Path, base_ref: str) -> Tuple[List[str], str]:
+def get_changed_files(repo: Path, base_ref: str, review_whole_repo: bool = False) -> Tuple[List[str], str]:
     merge_base = ""
     if base_ref:
         rc, out = run_git(repo, ["merge-base", "HEAD", base_ref])
-        if rc == 0 and out:
-            merge_base = out
+        if rc == 0 and out.strip():
+            merge_base = out.strip()
     files: Set[str] = set()
     if merge_base:
         rc, diff_out = run_git(repo, ["diff", "--name-only", f"{merge_base}...HEAD"])
         if rc == 0 and diff_out:
             files.update(line.strip() for line in diff_out.splitlines() if line.strip())
-    rc_st, st_out = run_git(repo, ["status", "--porcelain"])
+    rc_st, st_out = run_git(repo, ["status", "--porcelain", "-z", "--untracked-files=all"])
     if rc_st == 0 and st_out:
-        for line in st_out.splitlines():
-            if len(line) > 3:
-                path_part = line[3:].strip()
-                if " -> " in path_part:
-                    path_part = path_part.split(" -> ", 1)[1].strip()
-                files.add(path_part)
-    # If repo has a clean working tree and no branch diff against base, inspect tracked files (review-whole-app mode)
-    if not files and repo.is_dir():
+        entries = st_out.split("\0")
+        i = 0
+        while i < len(entries):
+            entry = entries[i]
+            i += 1
+            if len(entry) < 4:
+                continue
+            files.add(entry[3:])
+            if entry[0] in "RC":  # rename/copy: next entry is the old path
+                i += 1
+    # Review mode on a clean tree with no branch diff: inspect a small repo's tracked files
+    if not files and review_whole_repo and repo.is_dir():
         rc_ls, ls_out = run_git(repo, ["ls-files"])
         if rc_ls == 0 and ls_out:
             tracked = [l.strip() for l in ls_out.splitlines() if l.strip()]
@@ -147,12 +167,14 @@ def scan_caller_fanout(repo: Path, candidate_files: List[str]) -> Dict[str, List
         rc, out = run_git(repo, ["grep", "-l", "-F", stem])
         if rc != 0 or not out:
             continue
+        own_mod = module_bucket(f)
         caller_mods: Set[str] = set()
         for hit in out.splitlines():
             if hit == f or is_test_or_doc(hit) or Path(hit).suffix.lower() not in (CODE_EXTS | UI_EXTS):
                 continue
-            caller_mods.add(module_bucket(hit))
-        if len(caller_mods) >= 3:
+            if module_bucket(hit) != own_mod:
+                caller_mods.add(module_bucket(hit))
+        if len(caller_mods) >= 2:
             fanout[f] = sorted(caller_mods)
     return fanout
 
@@ -206,7 +228,7 @@ def recommend(args: argparse.Namespace) -> Dict:
     base_ref = ""
     if repo and repo.is_dir() and not args.no_git_diff:
         base_ref = detect_default_base(repo, args.base or "")
-        git_files, _ = get_changed_files(repo, base_ref)
+        git_files, _ = get_changed_files(repo, base_ref, review_whole_repo=(args.kind == "review"))
         files = sorted(set(files) | set(git_files))
 
     non_test_files = [f for f in files if not is_test_or_doc(f)]
@@ -229,8 +251,8 @@ def recommend(args: argparse.Namespace) -> Dict:
     if args.kind == "hotfix":
         tier2_reasons.append("Production hotfix (needs root-cause repro + blast-radius proof)")
         risk_dims += 1
-    elif args.kind == "bug" and (len(non_test_files) != 1 or shared_files or boundary_hits):
-        tier2_reasons.append("Multi-file or boundary bug fix (reproduce before patching)")
+    elif args.kind == "bug":
+        tier2_reasons.append("Bug fix (reproduce on the real artifact before patching)")
 
     if caller_fanout:
         top = ", ".join(f"{k} ({len(v)} modules)" for k, v in list(caller_fanout.items())[:3])
@@ -308,6 +330,17 @@ def recommend(args: argparse.Namespace) -> Dict:
             "SKIP /pstack:how fan-out, /architect, /arena, /statechart, /interrogate, and /council",
         ]
 
+    if args.kind == "review":
+        run_tools = ["Review mode: read-only, skip Upfront/Build/Design Lock"] + [
+            s for s in run_tools if not s.startswith(("Upfront:", "Build:"))
+        ]
+
+    missing = missing_skills()
+    if missing:
+        run_tools.append(
+            "Not installed: " + ", ".join(missing) + " -> use the matching row in SKILL.md 'If a skill is not installed'"
+        )
+
     return {
         "tier": tier,
         "tier_name": tier_name,
@@ -323,6 +356,7 @@ def recommend(args: argparse.Namespace) -> Dict:
         "has_async_primitives": has_async,
         "reasons": tier3_reasons + tier2_reasons or ["Isolated single-module change with no shared callers, boundary contracts, or async primitives"],
         "run": run_tools,
+        "missing_skills": missing,
         "skip": skip_tools,
     }
 

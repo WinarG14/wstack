@@ -6,6 +6,10 @@ Run on 25 Nov 2026. One fault-seeded app, three arms, one run per arm.
 
 `/adaptive-build` (Tier 2) fixed **12 of 12** seeded defects. The no-skill baseline and the full 3-model council each fixed **10 of 12**. `/adaptive-build` cost about the same as no skill (USD 1.53 vs USD 1.51) and about **4x less** than the council (USD 6.19, and the council was not finished).
 
+![Benchmark summary](benchmark-summary.png)
+
+Chart source: [`benchmark-summary.html`](benchmark-summary.html).
+
 ## Testbed
 
 SpendPulse is a small expense and approval tracker: a Node HTTP API, plain HTML/CSS/JS, and a JSON file for storage. The source is in [`testbed/`](testbed/). It starts with **12 planted defects** (0 of 12 pass at baseline):
@@ -84,15 +88,19 @@ Rates used, USD per 1M tokens (in / cache read / cache write / out): Claude Opus
 - **The scorer shares code with Arm B.** `score_arm.mjs` uses the skill's own `ui_geometry_audit.js` for 5 of the 12 checks (V1-V4 and U2). The two defects that only Arm B fixed (V3 and U2) are both in that group. The screenshots in [`evidence/`](evidence/) show the defects are real (buttons off screen, raw IDs on screen), but an independent scorer would make this stronger.
 - **Arm C is not finished.** Its defect score is from after round 1. Its cost covers rounds 1 and 2. A full round 3 would add cost and might fix more.
 - **Parent-session overhead is not counted** for Arm B or Arm C (the session that ran the triage and launched the child runs). Arm A is one session, so its count includes everything.
+- **Arm B was a partial Tier 2.** It ran the triage, Layer 1, Layer 2, the 2-model fast council and one `ponytail` fix pass. It did not run `ponytail-review` or `/pstack:how`. A full Tier 2 run would cost more.
+- **Two scorer checks are weak.** U3's double-submit guard is a regex on `app.js`, not a click test. U1 passes when the row count does not change after Delete, so a broken Delete button would also pass.
+- **The scripts changed after the run.** On 27 Nov 2026 the Playwright loader, the browser launch and the way the oracle is injected changed for portability. The scoring logic did not change, and the untouched testbed still scores 0 of 12.
 - The planted defects were chosen by the same person who built the skill. A blind defect set from someone else is the obvious next step.
 
 ## Reproduce
 
 ```bash
-npm i playwright && npx playwright install chromium
-cd research/adaptive-build-benchmark/testbed && PORT=4150 node server.mjs &
-# give each arm a fresh copy of testbed/, let it work, then score it:
-node research/adaptive-build-benchmark/score_arm.mjs --arm-dir <arm-copy> --port 4151 --out <evidence-dir>
+npm i -g playwright && npx playwright install chromium
+# give each arm a fresh copy of testbed/, let it work, then score it
+# (the scorer starts the arm's server on --port by itself):
+cp -R research/adaptive-build-benchmark/testbed /tmp/arm-x
+node research/adaptive-build-benchmark/score_arm.mjs --arm-dir /tmp/arm-x --port 4151 --out /tmp/arm-x-evidence
 ```
 
 Design notes behind the skill (expert terms, neighbour fields, the sharpened brief): [`design-notes.md`](design-notes.md).

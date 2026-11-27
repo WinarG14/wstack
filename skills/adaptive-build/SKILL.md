@@ -17,12 +17,15 @@ One skill for both **Development** and **Review** on any codebase. It replaces g
 
 Run the bundled repo-agnostic classifier before coding (with `--no-git-diff --summary "<goal>"`) and again on the real diff before review:
 
-On Windows, use `py -3` in place of `python3` (the Windows `python` is often only the Store placeholder).
+`<skill_dir>` below is the folder that holds this `SKILL.md` (for example `~/.claude/skills/adaptive-build` or `~/.codex/skills/adaptive-build`). On Windows, use `py -3` in place of `python3` (the Windows `python` is often only the Store placeholder).
 
 ```bash
-python3 ~/.claude/skills/adaptive-build/scripts/adaptive_triage.py \
-  --repo <repo_path> --kind <feature|bug|hotfix|refactor> --summary "<goal>"
+python3 <skill_dir>/scripts/adaptive_triage.py \
+  --repo <repo_path> --kind <feature|bug|hotfix|refactor|review> --summary "<goal>" \
+  [--failed-attempts <n>] [--json]
 ```
+
+The output ends with a `Not installed:` line when a skill this file calls is missing. For each one, use its row in **If a skill is not installed** below. Never skip the step silently.
 
 Announce in 2 lines: detected **Tier (1/2/3)**, **Stack (FE / BE / Full-Stack / CLI)**, exact tools you will run, and what you are skipping to save tokens.
 
@@ -42,7 +45,7 @@ Announce in 2 lines: detected **Tier (1/2/3)**, **Stack (FE / BE / Full-Stack / 
 
 ## Review Mode (`/adaptive-build review <PR / branch / path>`)
 
-Skip Design Lock and feature planning. Run `adaptive_triage.py`, detect stack + tier, and execute the lowest-cost, highest-yield review lane (read-only unless asked to fix):
+Skip Design Lock and feature planning. Run `adaptive_triage.py --kind review`, detect stack + tier, and execute the lowest-cost, highest-yield review lane (read-only unless asked to fix):
 
 | Stack Detected | Highest-Frequency Failures | Optimal Review Lane | Skip (Token Guard) |
 |---|---|---|---|
@@ -73,7 +76,29 @@ Use each tool for its **one sharpest job**. Never stack two tools that do the sa
 | `/pstack:benchmark-checklist` | Vet perf/eval measurements (limiter, errors, repeatability) | Whenever reporting speedups, latency, or eval numbers | Skip when not benchmarking |
 | `/pstack:correct` | Encode repeat bug classes (2nd occurrence) into types/lint/CI/scripts | Post-review / post-bug retrospective | Skip on one-off mistakes |
 | `/pstack:arena` | Duplicate competing full-code implementations | **ONLY when explicitly requested** for zero-precedent bakeoffs | **Always skip by default** (use `/architect` sketches instead) |
-| `ui-reviewer` / `design-taste-frontend` | Visual craft, typography, hierarchy, operational clarity | `ui-reviewer` for web apps/dashboards/tools; `design-taste-frontend` for marketing/landing/brand sites | Skip on non-UI tasks |
+| `ui-reviewer` / `design-taste-frontend` (optional) | Visual craft, typography, hierarchy, operational clarity | Any UI review skill you have for web apps/dashboards/tools; [`design-taste-frontend`](https://github.com/leonxlnx/taste-skill) for marketing/landing/brand sites. Layer 2 below covers the basics without them | Skip on non-UI tasks |
+
+### If a skill is not installed
+
+The bundled parts always work: `adaptive_triage.py`, Layer 1 (`browser_audit.mjs` + `ui_geometry_audit.js`) and the Layer 2/3 rubric in `references/`. Every other row names an outside skill. If it is missing, do its job by hand with the fallback, and say in the final report which fallbacks you used.
+
+| Missing | Do this instead |
+|---|---|
+| `ponytail` | Write the smallest diff that solves the task. Reuse existing helpers. No new abstraction, option or dependency that the task does not need. |
+| `ponytail-review` | Re-read the full diff and every caller of changed code. List only real bugs, risks and lines that can go. Fix them before any council. |
+| `sol-loop` | Ask one fresh reviewer from another model family to review the diff. Fix the real findings, then ask again. Stop at 2 rounds or when only nits remain. |
+| `council` (2-model or 3-model) | Run the same loop with 2 (or 3) reviewers from different providers in parallel. If your harness has only one provider, use one fresh-context reviewer and say that the council was not available. |
+| `/pstack:how` | Before coding, list every caller of the code you change (`git grep`) and the single owner of the data. Read them. |
+| `/pstack:why` | Read `git log -L` / `git blame` for the odd lines before you change them. |
+| `/pstack:reframe` + `/pstack:sharpen` | Write the goal as 3 to 5 checkable pass/fail criteria before design. |
+| `/pstack:architect` | Sketch 2 different designs in a few lines each. Pick the one with one state owner and fewer boundaries. Say why. |
+| `/pstack:statechart` | Write the states and transitions as a table. Check each pair of events that can arrive in either order. |
+| `/pstack:blast-radius` | Name the one fact that makes the change safe. Prove it by running code (a test or a script), not by reading. |
+| `/pstack:interrogate` | Ask reviewers for executable repros only. Drop any finding that does not reproduce. |
+| `/pstack:figure-it-out` | Write a phased plan with a check at the end of each phase before an unattended run. |
+| `/pstack:benchmark-checklist` | For any speed or eval number: same machine, several runs, say what limits it, report errors. |
+| `/pstack:correct` | When a bug class repeats, add a test, type, lint rule or CI check that fails on it. |
+| `ui-reviewer` / `design-taste-frontend` | Use the Layer 2 rubric in `references/blind-visual-heuristic-critic.md`. |
 
 ---
 
@@ -85,7 +110,7 @@ Static code review alone misses rendered geometry failures and "common sense" UX
 Run the bundled headless browser audit against the running app across desktop (`1440x900`) and narrow/mobile (`390x844` or `768x1024`) plus key interactive states:
 
 ```bash
-node ~/.claude/skills/adaptive-build/scripts/browser_audit.mjs \
+node <skill_dir>/scripts/browser_audit.mjs \
   --url http://127.0.0.1:<port> \
   --out <evidence_dir> \
   --viewports 1440x900,390x844 \
@@ -106,7 +131,7 @@ Spawn ONE fresh vision-capable reviewer with **zero code, zero diff, and zero co
 2. The captured state PNGs (desktop, mobile, empty, modal/hover, error)
 3. The Layer 1 `audit-report.json`
 
-It evaluates every screen against **Nielsen's 10 Usability Heuristics** and **UI Craft** (`ui-reviewer` lenses) and splits findings into two strict buckets to avoid scope creep:
+It evaluates every screen against **Nielsen's 10 Usability Heuristics** and **UI Craft** (hierarchy, spacing, alignment, type) and splits findings into two strict buckets to avoid scope creep:
 
 - **Bucket A: Auto-Fix Common-Sense UX Hygiene (fix immediately in Build/Polish mode):**
   - Layout clipping, dead gaps, overlap, mobile overflow, off-screen controls

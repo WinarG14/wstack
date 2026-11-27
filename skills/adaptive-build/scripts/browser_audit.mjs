@@ -13,30 +13,11 @@
  */
 
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { createRequire } from 'node:module';
+import { loadPlaywright, launchChromium } from './load_playwright.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
-
-function loadPlaywright() {
-  const candidates = [
-    'playwright',
-    'playwright-core',
-    path.join(os.homedir(), '.local/lib/node_modules/playwright'),
-    path.join(os.homedir(), '.local/lib/node_modules/playwright-core'),
-  ];
-  for (const mod of candidates) {
-    try {
-      return require(mod);
-    } catch {
-      // try next
-    }
-  }
-  throw new Error('Playwright not found. Install playwright or set NODE_PATH.');
-}
 
 function parseArgs(argv) {
   const args = { viewports: '1440x900,390x844', waitMs: 350 };
@@ -60,14 +41,6 @@ function parseArgs(argv) {
   return args;
 }
 
-async function launchBrowser(chromium) {
-  const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  if (fs.existsSync(chromePath)) {
-    return chromium.launch({ headless: true, executablePath: chromePath });
-  }
-  return chromium.launch({ headless: true });
-}
-
 async function runAudit() {
   const args = parseArgs(process.argv.slice(2));
   const outDir = path.resolve(args.out);
@@ -81,7 +54,7 @@ async function runAudit() {
 
   const actions = args.actions ? JSON.parse(fs.readFileSync(path.resolve(args.actions), 'utf8')) : [];
   const { chromium } = loadPlaywright();
-  const browser = await launchBrowser(chromium);
+  const browser = await launchChromium(chromium);
 
   const report = {
     url: args.url,
@@ -101,7 +74,8 @@ async function runAudit() {
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
           const text = msg.text();
-          if (!text.includes('favicon.ico')) consoleErrors.push(text);
+          const src = msg.location()?.url || '';
+          if (!src.endsWith('/favicon.ico') && !text.includes('favicon.ico')) consoleErrors.push(text);
         }
       });
       page.on('pageerror', (err) => pageErrors.push(String(err)));
@@ -115,10 +89,8 @@ async function runAudit() {
       await page.waitForTimeout(Number(args.waitMs));
 
       const captureState = async (stateName) => {
-        const audit = await page.evaluate((src) => {
-          const fn = eval(src);
-          return fn(document.body, {});
-        }, oracleSource);
+        // A string expression runs through the DevTools protocol, so a strict page CSP cannot block it.
+        const audit = await page.evaluate(`(${oracleSource})(document.body, {})`);
         const shotName = `${vp.label}-${stateName}.png`;
         const shotPath = path.join(outDir, shotName);
         await page.screenshot({ path: shotPath, fullPage: true });
@@ -138,29 +110,31 @@ async function runAudit() {
           failedRequests: [...failedRequests],
           audit,
         });
+        // Each state reports only the errors raised since the previous state.
+        consoleErrors.length = 0;
+        pageErrors.length = 0;
+        failedRequests.length = 0;
       };
 
       await captureState('initial');
 
-      // Only run interactive actions on the primary desktop viewport unless action specifies viewport
-      if (vp === viewports[0] && actions.length > 0) {
-        for (const act of actions) {
-          if (act.viewport && act.viewport !== vp.label) continue;
-          try {
-            if (act.click) await page.click(act.click, { timeout: 5000 });
-            if (act.fill) await page.fill(act.fill.selector, act.fill.value, { timeout: 5000 });
-            if (act.press) await page.keyboard.press(act.press);
-            await page.waitForTimeout(act.waitMs || Number(args.waitMs));
-            await captureState(act.name || 'action');
-          } catch (err) {
-            report.overallPass = false;
-            report.states.push({
-              viewport: vp.label,
-              state: act.name || 'action',
-              pass: false,
-              actionError: String(err),
-            });
-          }
+      // An action runs on its own "viewport" (e.g. "390x844"), or on the first viewport when it names none.
+      for (const act of actions) {
+        if (act.viewport ? act.viewport !== vp.label : vp !== viewports[0]) continue;
+        try {
+          if (act.click) await page.click(act.click, { timeout: 5000 });
+          if (act.fill) await page.fill(act.fill.selector, act.fill.value, { timeout: 5000 });
+          if (act.press) await page.keyboard.press(act.press);
+          await page.waitForTimeout(act.waitMs || Number(args.waitMs));
+          await captureState(act.name || 'action');
+        } catch (err) {
+          report.overallPass = false;
+          report.states.push({
+            viewport: vp.label,
+            state: act.name || 'action',
+            pass: false,
+            actionError: String(err),
+          });
         }
       }
       await context.close();
