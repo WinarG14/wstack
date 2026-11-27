@@ -341,7 +341,7 @@
     if (tag === 'input') {
       const type = (el.getAttribute('type') || 'text').toLowerCase();
       if (type === 'submit' || type === 'button' || type === 'reset') {
-        const val = (el.getAttribute('value') || '').trim();
+        const val = (el.value || el.getAttribute('value') || '').trim();
         if (val) return val;
         // Native browser default labels for submit/reset inputs
         if (type === 'submit') return 'Submit';

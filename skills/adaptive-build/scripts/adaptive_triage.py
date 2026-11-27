@@ -412,9 +412,10 @@ def recommend(args: argparse.Namespace) -> Dict:
             raw = _normalize_git_path(part.strip())
             if not raw:
                 continue
-            if subdir_prefix and not raw.startswith(subdir_prefix) and repo and (repo / raw).exists():
+            if subdir_prefix and not raw.startswith(subdir_prefix):
                 raw = f"{subdir_prefix}{raw}"
             files.append(raw)
+    files = sorted(set(files))
 
     base_ref = ""
     scope_incomplete = False

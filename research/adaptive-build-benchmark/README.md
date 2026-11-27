@@ -114,3 +114,18 @@ Because Arm B above audited a pre-seeded app before Neon wrote code, we ran a co
 - **Winner under both authors:** **GPT-6.2-Sol (High) + Gemini 4 Neon (High)** achieved **96.3%** recall on Neon-authored code (USD 1.14 council vs USD 2.09 for Opus + Sol) and **96.2%** recall on Sol-authored code (USD 1.06 council vs USD 2.29 and 73.1% recall for Opus + Neon, which also introduced 1 regression).
 - **Best end-state mode:** GPT-6.2-Sol (High) build + Layer 1/2 + Sol & Neon Tier 2 Fast Council + Sol fix (**USD 3.40** end-to-end, 0 regressions).
 - Full per-defect matrices, 16-run token accounting, and end-state architecture: [`author-swap-results.md`](author-swap-results.md) and [`author-swap-experiment.html`](author-swap-experiment.html).
+
+## Cross-Provider Hardening Score Trend (28 Nov 2026)
+
+We audited `adaptive-build` live inside all three T3 Code build harnesses (**Gemini 4 Neon High** on `antigravity`, **Claude Opus 5.5 High** on native `claudeAgent`, and **GPT-6.2-Sol High** on `codex`) across three commits (`f93c68a` baseline -> `4876404` hardening + 2-round `sol-loop` -> `7e5e810` final polish):
+
+![Cross-Provider Score Increase Trend](cross-provider-score-trend.png)
+
+| Harness / Model | `f93c68a` (v0) | `4876404` (v1) | `7e5e810` (v2) | Total Lift | Final Verdict |
+|---|---:|---:|---:|---:|---|
+| **Gemini 4 Neon High** (`antigravity`) | 5.4 / 10 | 9.0 / 10 | **9.3 / 10** | **+3.9** | Ship (0 P0 / 0 P1) |
+| **Claude Opus 5.5 High** (`claudeAgent`) | 5.8 / 10 | 8.4 / 10 | **8.9 / 10** | **+3.1** | Ship (0 P0 / 0 P1) |
+| **GPT-6.2-Sol High** (`codex`) | 6.0 / 10 | 7.9 / 10 | **8.3 / 10** | **+2.3** | Hold on `--files` dedup (closed in follow-up) |
+| **3-Provider Mean** | **5.73 / 10** | **8.43 / 10** | **8.83 / 10** | **+3.10** | **0 P0 blockers** |
+
+Interactive source: [`cross-provider-score-trend.html`](cross-provider-score-trend.html).
