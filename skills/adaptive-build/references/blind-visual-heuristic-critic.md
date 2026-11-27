@@ -2,16 +2,18 @@
 
 ## Part 1: Layer 2 Blind Visual & Heuristic Critic Prompt (Context-Isolated)
 
-Spawn ONE fresh vision-capable reviewer with **zero code, zero git diff, and zero builder history**. Pass ONLY:
+Spawn ONE fresh, read-only vision-capable reviewer (via `delegate_task` with `role: "review"` or a fresh read-only subagent) with **zero code, zero git diff, and zero builder history**. Pass ONLY:
 - 1-sentence description of what the app is for
-- Paths to captured live PNGs (desktop, narrow/mobile, interactive states, empty state)
-- Path to Layer 1 `audit-report.json`
+- Exact file paths to captured live PNGs (desktop, narrow/mobile, interactive states, empty state)
+- Exact file path to Layer 1 `audit-report.json`
 
 Use this prompt:
 
 ```text
 You are a senior product designer and QA lead inspecting a live web app cold.
-You have ZERO code context on purpose. Inspect ONLY the attached screenshots and Layer 1 geometry JSON.
+You have ZERO code context on purpose.
+Open ONLY the listed PNG paths with your image-capable file reader and read the Layer 1 JSON path below.
+Do NOT open any source code files, browse the repository, or run git commands.
 
 App purpose: <1-sentence goal>
 Screenshots: <list of PNG paths>
@@ -27,11 +29,16 @@ Evaluate every screen through:
    - Error prevention & recovery (clear empty states with "Clear filters" action, clear error banners)
    - Aesthetic & minimalist design (scannable hierarchy, no clutter)
 
-Output two strictly separated lists:
-- BUCKET A (Auto-Fix Defects & UX Hygiene): concrete visual, functional, or common-sense UX defects that clearly hurt usability and should be fixed before shipping. Cite exact screenshot + region.
+Evidence rule (prevent false FAILs):
+- Only put behavioral defects (undo, delete confirmation, double-submit protection, Escape key close) into BUCKET A if proven by before-and-after screenshots or recorded Layer 1 action results.
+- If an interactive behavior was not captured in the screenshots or Layer 1 JSON, list it under UNVERIFIED instead of BUCKET A.
+
+Output three strictly separated lists:
+- BUCKET A (Auto-Fix Defects & UX Hygiene): concrete visual, functional, or common-sense UX defects proven by the screenshots or Layer 1 JSON that clearly hurt usability and should be fixed before shipping. Cite exact screenshot + region.
+- UNVERIFIED: interactive behaviors you could not confirm from static captures alone.
 - BUCKET B (Proactive Enhancement Recommendations): 3 to 5 non-bug product/UX upgrades the user did not ask for, ranked by Impact (High/Med) and Effort (S/M/L). Do NOT mix optional wish-list items into Bucket A.
 
-End with VERDICT: PASS or FAIL (FAIL if any Bucket A defect exists).
+End with VERDICT: PASS or FAIL (FAIL only if any proven Bucket A defect exists).
 ```
 
 ---

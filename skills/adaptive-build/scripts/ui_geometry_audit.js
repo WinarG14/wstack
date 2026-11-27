@@ -23,6 +23,91 @@
     return r.width > 0.5 && r.height > 0.5;
   };
 
+  // Walks ancestors because CSS opacity does not inherit (a button inside an opacity:0 drawer is invisible).
+  const isElementVisible = (el) => {
+    if (!isShownBox(el)) return false;
+    for (let cur = el; cur && cur.nodeType === 1 && cur !== document.documentElement; cur = cur.parentElement) {
+      const cs = getComputedStyle(cur);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+    }
+    return true;
+  };
+
+  const isVisuallyHiddenSrOnly = (el, cs) => {
+    const r = el.getBoundingClientRect();
+    const tinyClip = r.width <= 1.5 && r.height <= 1.5 && (cs.overflow === 'hidden' || cs.overflowX === 'hidden');
+    const clipPathHidden = cs.clipPath && /inset\(\s*50%/.test(cs.clipPath);
+    const clipRectHidden = cs.clip && /rect\(\s*0(px)?\s*,\s*0(px)?\s*,\s*0(px)?\s*,\s*0(px)?\s*\)/.test(cs.clip);
+    return tinyClip || clipPathHidden || clipRectHidden;
+  };
+
+  const establishesContainingBlock = (cs, forFixed) => {
+    const hasCb =
+      (cs.transform && cs.transform !== 'none') ||
+      (cs.translate && cs.translate !== 'none') ||
+      (cs.rotate && cs.rotate !== 'none') ||
+      (cs.scale && cs.scale !== 'none') ||
+      (cs.perspective && cs.perspective !== 'none') ||
+      (cs.filter && cs.filter !== 'none') ||
+      (cs.backdropFilter && cs.backdropFilter !== 'none') ||
+      (cs.contain && /(paint|layout|strict|content)/.test(cs.contain)) ||
+      (cs.willChange && /\b(transform|translate|rotate|scale|perspective|filter|backdrop-filter)\b/.test(cs.willChange));
+    if (forFixed) return hasCb;
+    return hasCb || cs.position !== 'static';
+  };
+
+  // Returns true only when ancestor `a` actually clips `el` per CSS containing-block rules.
+  const ancestorCanClip = (el, ancestor) => {
+    let sawFixed = false;
+    let sawAbsolute = false;
+    let absContained = false;
+    for (let cur = el; cur && cur !== ancestor; cur = cur.parentElement) {
+      const pcs = getComputedStyle(cur);
+      if (cur !== el) {
+        if (sawFixed && establishesContainingBlock(pcs, true)) sawFixed = false;
+        if (sawAbsolute && establishesContainingBlock(pcs, false)) absContained = true;
+      }
+      if (pcs.position === 'fixed') sawFixed = true;
+      else if (pcs.position === 'absolute') {
+        sawAbsolute = true;
+        absContained = false;
+      }
+    }
+    const acs = getComputedStyle(ancestor);
+    if (sawFixed) return establishesContainingBlock(acs, true);
+    if (sawAbsolute && !absContained) return establishesContainingBlock(acs, false);
+    return true;
+  };
+
+  // Exempts an off-viewport control only when it is not clipped by an inner wrapper AND scrolling its
+  // horizontal scroll ancestor can bring the full control inside the viewport-visible area of the scroller.
+  const isReachableInHorizontalScroller = (el, raw) => {
+    for (let a = el.parentElement; a && a !== document.body && a !== document.documentElement; a = a.parentElement) {
+      if (!ancestorCanClip(el, a)) continue;
+      const ov = getComputedStyle(a);
+      if (ov.overflowX === 'hidden' || ov.overflowX === 'clip') {
+        const ar = a.getBoundingClientRect();
+        if (raw.right > ar.right + 2 || raw.left < ar.left - 2) return false;
+      }
+      if ((ov.overflowX === 'auto' || ov.overflowX === 'scroll') && a.scrollWidth > a.clientWidth + 1) {
+        const ar = a.getBoundingClientRect();
+        const visLeft = Math.max(ar.left, 0);
+        const visRight = Math.min(ar.right, window.innerWidth);
+        if (visRight - visLeft <= 1) continue;
+        const maxScroll = a.scrollWidth - a.clientWidth;
+        const isRtl = ov.direction === 'rtl';
+        const minShift = isRtl ? -a.scrollLeft : a.scrollLeft - maxScroll;
+        const maxShift = isRtl ? maxScroll + a.scrollLeft : a.scrollLeft;
+        const needMin = visLeft - raw.left - 2;
+        const needMax = visRight - raw.right + 2;
+        if (Math.max(minShift, needMin) <= Math.min(maxShift, needMax)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const isOutOfFlow = (el) => {
     let cur = el;
     while (cur && cur !== root && cur !== document.body) {
@@ -70,15 +155,14 @@
   const largeVerticalGaps = [];
   const seenGaps = new Set();
   for (const container of [root, ...root.querySelectorAll('main, section, [role="main"], .container, .content, .panel, .card')]) {
-    if (!isShownBox(container)) continue;
+    if (!isElementVisible(container)) continue;
     const cStyle = getComputedStyle(container);
     if (cStyle.display.includes('flex') && !cStyle.flexDirection.startsWith('column')) continue;
     if (cStyle.display.includes('grid')) continue;
     const visibleKids = [...container.children].filter((child) => {
-      if (!isShownBox(child)) return false;
+      if (!isElementVisible(child)) return false;
       const cs = getComputedStyle(child);
       if (cs.position === 'absolute' || cs.position === 'fixed') return false;
-      if (parseFloat(cs.opacity) === 0 || cs.visibility === 'hidden') return false;
       return true;
     });
     for (let i = 0; i < visibleKids.length - 1; i++) {
@@ -98,35 +182,73 @@
     }
   }
 
-  // 2. Clipped text (leaf overflow or inline-flex/flex nowrap overflowing without ellipsis).
-  const isVisuallyHiddenSrOnly = (el, cs) => {
-    const r = el.getBoundingClientRect();
-    const tinyClip = r.width <= 1.5 && r.height <= 1.5 && (cs.overflow === 'hidden' || cs.overflowX === 'hidden');
-    const clipPathHidden = cs.clipPath && /inset\(\s*50%/.test(cs.clipPath);
-    const clipRectHidden = cs.clip && /rect\(\s*0(px)?\s*,\s*0(px)?\s*,\s*0(px)?\s*,\s*0(px)?\s*\)/.test(cs.clip);
-    return tinyClip || clipPathHidden || clipRectHidden;
-  };
+  // 2. Clipped text (leaf overflow, nowrap overflow, or parent overflow:hidden clipping without ellipsis).
   const clippedText = [];
+  const seenClipped = new Set();
   for (const el of root.querySelectorAll('*')) {
-    if (!isShownBox(el)) continue;
+    if (!isElementVisible(el)) continue;
     const cs = getComputedStyle(el);
-    if (parseFloat(cs.opacity) === 0 || cs.visibility === 'hidden' || isVisuallyHiddenSrOnly(el, cs)) continue;
+    if (isVisuallyHiddenSrOnly(el, cs)) continue;
     const text = (el.textContent || '').trim();
     if (!text) continue;
     const isLeaf = el.children.length === 0;
     const isNowrapHidden = cs.whiteSpace === 'nowrap' && (cs.overflowX === 'hidden' || cs.overflow === 'hidden');
-    if (!isLeaf && !isNowrapHidden) continue;
-    if (el.scrollWidth > el.clientWidth + 1) {
-      const intentionalEllipsis = isLeaf && cs.textOverflow === 'ellipsis' && cs.overflowX === 'hidden' && el.getAttribute('title');
+
+    if ((isLeaf || isNowrapHidden) && el.scrollWidth > el.clientWidth + 1) {
+      const intentionalEllipsis =
+        isLeaf &&
+        cs.textOverflow === 'ellipsis' &&
+        cs.overflowX === 'hidden' &&
+        Boolean(el.getAttribute('title') || el.getAttribute('aria-label'));
       if (!intentionalEllipsis) {
-        clippedText.push({
-          el: labelOf(el),
-          display: cs.display,
-          textOverflow: cs.textOverflow,
-          scrollWidth: Math.round(el.scrollWidth),
-          clientWidth: Math.round(el.clientWidth),
-          text: text.slice(0, 50),
-        });
+        const key = `${labelOf(el)}:${text.slice(0, 30)}`;
+        if (!seenClipped.has(key)) {
+          seenClipped.add(key);
+          clippedText.push({
+            el: labelOf(el),
+            display: cs.display,
+            textOverflow: cs.textOverflow,
+            scrollWidth: Math.round(el.scrollWidth),
+            clientWidth: Math.round(el.clientWidth),
+            text: text.slice(0, 50),
+          });
+        }
+      }
+      continue;
+    }
+
+    // Check if a leaf text element is clipped horizontally by a tight overflow:hidden ancestor that can actually clip it.
+    if (isLeaf) {
+      const r = el.getBoundingClientRect();
+      if (!isReachableInHorizontalScroller(el, r)) {
+        for (let a = el.parentElement; a && a !== document.body && a !== document.documentElement; a = a.parentElement) {
+          if (!ancestorCanClip(el, a)) continue;
+          const acs = getComputedStyle(a);
+          if (isVisuallyHiddenSrOnly(a, acs)) break;
+          if (acs.overflowX === 'auto' || acs.overflowX === 'scroll') break;
+          if (acs.overflowX === 'hidden' || acs.overflowX === 'clip') {
+            const ar = a.getBoundingClientRect();
+            const intentionalAncestorEllipsis =
+              acs.textOverflow === 'ellipsis' &&
+              Boolean(a.getAttribute('title') || a.getAttribute('aria-label') || el.getAttribute('title') || el.getAttribute('aria-label'));
+            if (!intentionalAncestorEllipsis && (r.right > ar.right + 2 || r.left < ar.left - 2)) {
+              const key = `${labelOf(el)}:${text.slice(0, 30)}`;
+              if (!seenClipped.has(key)) {
+                seenClipped.add(key);
+                clippedText.push({
+                  el: labelOf(el),
+                  clippedBy: labelOf(a),
+                  display: cs.display,
+                  textOverflow: acs.textOverflow,
+                  scrollWidth: Math.round(r.width),
+                  clientWidth: Math.round(ar.width),
+                  text: text.slice(0, 50),
+                });
+              }
+              break;
+            }
+          }
+        }
       }
     }
   }
@@ -145,9 +267,7 @@
   const interactiveSel = 'button, a[href], input:not([type="hidden"]), select, textarea, [role="button"]';
   const visibleControls = [];
   for (const el of root.querySelectorAll(interactiveSel)) {
-    if (!isShownBox(el)) continue;
-    const cs = getComputedStyle(el);
-    if (parseFloat(cs.opacity) === 0 || cs.visibility === 'hidden') continue;
+    if (!isElementVisible(el)) continue;
     const raw = el.getBoundingClientRect();
     let r = raw;
     // Clip to scroll/overflow ancestors: a control scrolled out of its container is not on screen and
@@ -160,8 +280,15 @@
       const right = Math.min(r.right, ar.right), bottom = Math.min(r.bottom, ar.bottom);
       r = { left, top, right: Math.max(left, right), bottom: Math.max(top, bottom) };
     }
-    if (r.right - r.left >= 1 && r.bottom - r.top >= 1) visibleControls.push({ el, r, label: labelOf(el), text: (el.innerText || el.getAttribute('aria-label') || el.placeholder || '').trim().slice(0, 40) });
-    if (raw.right > window.innerWidth + 2 || raw.left < -2) {
+    if (r.right - r.left >= 1 && r.bottom - r.top >= 1) {
+      visibleControls.push({
+        el,
+        r,
+        label: labelOf(el),
+        text: (el.innerText || el.getAttribute('aria-label') || el.placeholder || '').trim().slice(0, 40),
+      });
+    }
+    if (!isReachableInHorizontalScroller(el, raw) && (raw.right > window.innerWidth + 2 || raw.left < -2)) {
       offViewportControls.push({
         el: labelOf(el),
         text: (el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 40),
@@ -198,7 +325,10 @@
   // 5. Broken images and UX hygiene text smells (raw ISO timestamps, internal enums, NaN/undefined, unlabeled controls).
   const brokenMedia = [];
   for (const img of root.querySelectorAll('img')) {
-    if (!isShownBox(img)) continue;
+    if (!isElementVisible(img)) continue;
+    const rect = img.getBoundingClientRect();
+    const isBelowFoldLazy = img.loading === 'lazy' && !img.complete && rect.top > window.innerHeight + 50;
+    if (isBelowFoldLazy) continue;
     if (!img.complete || img.naturalWidth === 0) {
       brokenMedia.push({ el: labelOf(img), src: img.getAttribute('src') || '' });
     }
@@ -229,9 +359,9 @@
   while (walker.nextNode()) {
     const node = walker.currentNode;
     const parent = node.parentElement;
-    if (!parent || !isShownBox(parent)) continue;
-    const tag = parent.tagName.toLowerCase();
-    if (tag === 'script' || tag === 'style' || tag === 'code' || tag === 'pre') continue;
+    if (!parent || !isElementVisible(parent)) continue;
+    if (parent.closest('script, style, code, pre, noscript')) continue;
+    if (isVisuallyHiddenSrOnly(parent, getComputedStyle(parent))) continue;
     const txt = (node.nodeValue || '').trim();
     if (!txt) continue;
     for (const [kind, re] of [

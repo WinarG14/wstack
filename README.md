@@ -1,6 +1,6 @@
 # wstack
 
-Agent skills I use every day, cleaned up so anyone can use them. They work in Claude Code and Codex.
+Agent skills I use every day, cleaned up so anyone can use them. They work in Claude Code, Codex, and Antigravity (T3 Code).
 (Yes, the name is a nod to [tstack](https://github.com/t3dotgg/tstack).)
 
 ## Skills
@@ -102,8 +102,9 @@ Older Claude Code (before 2.1.275): `/plugin marketplace add WinarG14/wstack`, t
 
 ```bash
 git clone https://github.com/WinarG14/wstack
-cp -R wstack/skills/* ~/.claude/skills/   # Claude Code
-cp -R wstack/skills/* ~/.codex/skills/    # Codex
+cp -R wstack/skills/* ~/.claude/skills/          # Claude Code
+cp -R wstack/skills/* ~/.codex/skills/           # Codex
+cp -R wstack/skills/* ~/.gemini/config/skills/   # Antigravity
 ```
 
 **UI layers only:** `npm i -g playwright && npx playwright install chromium` (or install Playwright in your project).
