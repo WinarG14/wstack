@@ -176,9 +176,11 @@ def inspect_skills() -> Tuple[List[str], List[str]]:
         for probe in missing_pstack_probes:
             missing.append(f"pstack:{probe}")
 
-    if any(_has_disable_model_invocation(p) for p in pstack_claude_files):
+    disabled_claude = [p for p in pstack_claude_files if _has_disable_model_invocation(p)]
+    if disabled_claude:
+        skills_dir = str(disabled_claude[0].parent.parent)
         notes.append(
-            "pstack (Claude plugin sets disable-model-invocation: true -> Read <pstack>/skills/<name>/SKILL.md directly instead of calling the Skill tool)"
+            f"pstack (Claude plugin sets disable-model-invocation: true -> Read {skills_dir}/<name>/SKILL.md directly instead of calling the Skill tool)"
         )
 
     return missing, notes
@@ -217,6 +219,7 @@ def detect_default_base(repo: Path, explicit_base: str) -> str:
     if explicit_base:
         if run_git(repo, ["rev-parse", "--verify", "-q", f"{explicit_base}^{{commit}}"])[0] == 0:
             return explicit_base
+        raise ValueError(f'Explicit --base ref "{explicit_base}" does not exist in {repo}')
     for cand in ("origin/main", "origin/master", "main", "master"):
         if run_git(repo, ["rev-parse", "--verify", "-q", f"{cand}^{{commit}}"])[0] == 0:
             return cand
@@ -406,8 +409,12 @@ def recommend(args: argparse.Namespace) -> Dict:
     files: List[str] = []
     for item in args.files:
         for part in item.split(","):
-            if part.strip():
-                files.append(part.strip())
+            raw = _normalize_git_path(part.strip())
+            if not raw:
+                continue
+            if subdir_prefix and not raw.startswith(subdir_prefix) and repo and (repo / raw).exists():
+                raw = f"{subdir_prefix}{raw}"
+            files.append(raw)
 
     base_ref = ""
     scope_incomplete = False
@@ -593,7 +600,11 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Print JSON output")
     args = parser.parse_args()
 
-    res = recommend(args)
+    try:
+        res = recommend(args)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 2
     if args.json:
         print(json.dumps(res, indent=2))
         return 0

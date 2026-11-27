@@ -10,7 +10,7 @@
  * actions.json: a list run in order after the "initial" state. Each action gets its own state.
  *   [{ "name": "modal-open", "click": "#newBtn" },
  *    { "name": "mobile-search", "viewport": "390x844", "fill": { "selector": "#q", "value": "zzzz" } },
- *    { "name": "modal-esc", "press": "Escape", "waitMs": 0, "expectStatus": [400] }]
+ *    { "name": "modal-esc", "press": "Escape", "waitMs": 0, "expectStatus": [400], "expectUrl": "/api/expenses" }]
  *   An action without "viewport" runs on the first viewport only.
  *
  * Captures:
@@ -110,9 +110,14 @@ async function runAudit() {
       const consoleErrors = [];
       const pageErrors = [];
       const failedRequests = [];
-      const observedStatuses = new Set();
+      const observedResponses = [];
+      let activeStepToken = 0;
+      const requestStepMap = new WeakMap();
       const seenStates = new Set();
 
+      page.on('request', (req) => {
+        requestStepMap.set(req, activeStepToken);
+      });
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
           const text = msg.text();
@@ -126,9 +131,10 @@ async function runAudit() {
       page.on('pageerror', (err) => pageErrors.push(String(err)));
       page.on('response', (res) => {
         if (res.url().endsWith('/favicon.ico')) return;
-        observedStatuses.add(res.status());
+        const stepToken = requestStepMap.get(res.request()) ?? activeStepToken;
+        observedResponses.push({ status: res.status(), url: res.url(), stepToken });
         if (res.status() >= 400) {
-          failedRequests.push({ status: res.status(), url: res.url() });
+          failedRequests.push({ status: res.status(), url: res.url(), stepToken });
         }
       });
       page.on('requestfailed', (req) => {
@@ -139,7 +145,7 @@ async function runAudit() {
         failedRequests.push({ status: 0, url, error: errText });
       });
 
-      const captureState = async (rawName, extraAllowedStatuses = new Set()) => {
+      const captureState = async (rawName, extraAllowedStatuses = new Set(), expectUrl = '', stepToken = 0) => {
         const baseName = sanitizeStateName(rawName, 'state');
         let stateName = baseName;
         let suffix = 2;
@@ -154,16 +160,27 @@ async function runAudit() {
         const shotPath = path.join(outDir, shotName);
         await page.screenshot({ path: shotPath, fullPage: true });
 
-        const isAllowedStatus = (code) => globalAllowedStatuses.has(code) || extraAllowedStatuses.has(code);
+        const urlMatches = (url) => (!expectUrl ? true : url.includes(expectUrl));
+        const matchesActionExpectation = (item) =>
+          extraAllowedStatuses.has(item.status) && item.stepToken === stepToken && urlMatches(item.url);
+        const isAllowedFailure = (req) => globalAllowedStatuses.has(req.status) || matchesActionExpectation(req);
+
         const allowedBudget = new Map();
         for (const req of failedRequests) {
-          if (isAllowedStatus(req.status)) {
+          if (isAllowedFailure(req)) {
             const k = `${req.status}:${req.url}`;
             allowedBudget.set(k, (allowedBudget.get(k) || 0) + 1);
           }
         }
-        const missingExpectedStatuses = [...extraAllowedStatuses].filter((code) => !observedStatuses.has(code));
-        const unexpectedFailures = failedRequests.filter((req) => !isAllowedStatus(req.status));
+        const matchedExpectedStatuses = new Set(
+          observedResponses
+            .filter((r) => r.stepToken === stepToken && urlMatches(r.url))
+            .map((r) => r.status)
+        );
+        const missingExpectedStatuses = [...extraAllowedStatuses].filter((code) => !matchedExpectedStatuses.has(code));
+        const unexpectedFailures = failedRequests
+          .filter((req) => !isAllowedFailure(req))
+          .map(({ status, url, error }) => (error ? { status, url, error } : { status, url }));
         const unexpectedConsoleErrors = consoleErrors
           .filter((entry) => {
             const m = entry.text.match(/^Failed to load resource: the server responded with a status of (\d{3})\b/);
@@ -204,7 +221,7 @@ async function runAudit() {
         consoleErrors.length = 0;
         pageErrors.length = 0;
         failedRequests.length = 0;
-        observedStatuses.clear();
+        observedResponses.length = 0;
       };
 
       try {
@@ -222,8 +239,9 @@ async function runAudit() {
           navigationError: String(err),
           consoleErrors: consoleErrors.splice(0).map((e) => e.text),
           pageErrors: pageErrors.splice(0),
-          failedRequests: failedRequests.splice(0),
+          failedRequests: failedRequests.splice(0).map(({ status, url, error }) => (error ? { status, url, error } : { status, url })),
         });
+        observedResponses.length = 0;
         await context.close();
         continue;
       }
@@ -238,12 +256,15 @@ async function runAudit() {
         const stateLabel = act.name || fallbackName;
         const waitTime = act.waitMs ?? Number(args.waitMs);
         const expectedStatuses = parseStatusSet(act.expectStatus);
+        const expectUrl = typeof act.expectUrl === 'string' ? act.expectUrl : '';
+        activeStepToken += 1;
+        const stepToken = activeStepToken;
         try {
           if (act.click) await page.click(act.click, { timeout: 5000 });
           if (act.fill) await page.fill(act.fill.selector, act.fill.value, { timeout: 5000 });
           if (act.press) await page.keyboard.press(act.press);
           if (waitTime > 0) await page.waitForTimeout(waitTime);
-          await captureState(stateLabel, expectedStatuses);
+          await captureState(stateLabel, expectedStatuses, expectUrl, stepToken);
         } catch (err) {
           report.overallPass = false;
           report.states.push({
@@ -253,9 +274,9 @@ async function runAudit() {
             actionError: String(err),
             consoleErrors: consoleErrors.splice(0).map((e) => e.text),
             pageErrors: pageErrors.splice(0),
-            failedRequests: failedRequests.splice(0),
+            failedRequests: failedRequests.splice(0).map(({ status, url, error }) => (error ? { status, url, error } : { status, url })),
           });
-          observedStatuses.clear();
+          observedResponses.length = 0;
         }
       }
       await context.close();

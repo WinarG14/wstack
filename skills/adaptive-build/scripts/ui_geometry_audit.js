@@ -270,9 +270,10 @@
     if (!isElementVisible(el)) continue;
     const raw = el.getBoundingClientRect();
     let r = raw;
-    // Clip to scroll/overflow ancestors: a control scrolled out of its container is not on screen and
-    // must not count as overlapping whatever sits over that spot (for example a fixed tab bar).
+    // Clip to scroll/overflow ancestors that can actually clip this control: a control scrolled out of
+    // its container is not on screen and must not count as overlapping whatever sits over that spot.
     for (let a = el.parentElement; a && a !== document.documentElement; a = a.parentElement) {
+      if (!ancestorCanClip(el, a)) continue;
       const ov = getComputedStyle(a);
       if (!/(auto|scroll|hidden|clip)/.test(ov.overflow + ov.overflowX + ov.overflowY)) continue;
       const ar = a.getBoundingClientRect();
@@ -335,6 +336,33 @@
   }
 
   const uxHygieneSmells = [];
+  const controlTextFallback = (el) => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === 'input') {
+      const type = (el.getAttribute('type') || 'text').toLowerCase();
+      if (type === 'submit' || type === 'button' || type === 'reset') {
+        const val = (el.getAttribute('value') || '').trim();
+        if (val) return val;
+        // Native browser default labels for submit/reset inputs
+        if (type === 'submit') return 'Submit';
+        if (type === 'reset') return 'Reset';
+      }
+      if (type === 'image') {
+        const alt = (el.getAttribute('alt') || '').trim();
+        if (alt) return alt;
+      }
+    }
+    const imgAlt = Array.from(el.querySelectorAll('img[alt]'))
+      .map((img) => (img.getAttribute('alt') || '').trim())
+      .filter(Boolean)
+      .join(' ');
+    if (imgAlt) return imgAlt;
+    const svgLabel = Array.from(el.querySelectorAll('svg[aria-label], svg title'))
+      .map((node) => (node.getAttribute?.('aria-label') || node.textContent || '').trim())
+      .filter(Boolean)
+      .join(' ');
+    return svgLabel;
+  };
   for (const c of visibleControls) {
     const accessibleName = (
       c.el.innerText ||
@@ -343,6 +371,7 @@
       c.el.getAttribute('aria-label') ||
       c.el.getAttribute('title') ||
       c.el.getAttribute('placeholder') ||
+      controlTextFallback(c.el) ||
       ''
     ).trim();
     if (!accessibleName) {

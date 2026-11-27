@@ -1,6 +1,6 @@
 ---
 name: adaptive-build
-description: Adaptive 3-tier build and review orchestrator for any repo. Zero-token triage, ponytail, pstack, locked cross-provider councils, and automated DOM + blind visual UX audits. Use for "/adaptive-build" or "adaptive build".
+description: Adaptive 3-tier build and review orchestrator for any repo. Zero-token triage, ponytail, pstack, locked cross-provider councils, and DOM + blind visual UX audits. Use for "/adaptive-build", "/adaptive-build review", or "smart build".
 ---
 
 # Adaptive Build & Review (Project-Agnostic 3-Tier Orchestrator)
@@ -155,7 +155,7 @@ node <skill_dir>/scripts/browser_audit.mjs \
   [--actions <actions.json>]
 ```
 
-`actions.json` is a list of steps, each saved as its own state: `name`, optional `viewport` (must match one of `--viewports`; without it the step runs on the first viewport), any of `click` (selector), `fill` (`{ "selector", "value" }`), or `press` (key), plus optional `waitMs` (0 allowed) and optional `expectStatus` (HTTP code or list of codes that MUST be observed during that step, suppressing only Chromium's matching network console error).
+`actions.json` is a list of steps, each saved as its own state: `name`, optional `viewport` (must match one of `--viewports`; without it the step runs on the first viewport), any of `click` (selector), `fill` (`{ "selector", "value" }`), or `press` (key), plus optional `waitMs` (0 allowed), optional `expectStatus` (HTTP code or list of codes that MUST be initiated and observed during that step, suppressing only Chromium's matching network console error), and optional `expectUrl` (URL substring required for `expectStatus`).
 
 Auto-fails on:
 - Invisible in-flow layout reservations (`opacity: 0` / `visibility: hidden` >= 16px) or abnormal dead vertical gaps (> 48px)
