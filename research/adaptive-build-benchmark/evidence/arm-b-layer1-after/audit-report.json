@@ -1,0 +1,135 @@
+{
+  "url": "http://127.0.0.1:4196",
+  "timestamp": "2026-11-24T18:19:56.835Z",
+  "overallPass": true,
+  "states": [
+    {
+      "viewport": "1440x900",
+      "state": "initial",
+      "pass": true,
+      "screenshot": "./arm-b-layer1-after/1440x900-initial.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "audit": {
+        "pass": true,
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "summary": {
+          "deadGaps": 0,
+          "clippedText": 0,
+          "horizontalOverflow": 0,
+          "offViewportControls": 0,
+          "overlappingControls": 0,
+          "brokenMedia": 0,
+          "uxHygieneSmells": 0
+        },
+        "deadGaps": [],
+        "clippedText": [],
+        "horizontalOverflow": [],
+        "offViewportControls": [],
+        "overlappingControls": [],
+        "brokenMedia": [],
+        "uxHygieneSmells": []
+      }
+    },
+    {
+      "viewport": "1440x900",
+      "state": "empty-search",
+      "pass": true,
+      "screenshot": "./arm-b-layer1-after/1440x900-empty-search.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "audit": {
+        "pass": true,
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "summary": {
+          "deadGaps": 0,
+          "clippedText": 0,
+          "horizontalOverflow": 0,
+          "offViewportControls": 0,
+          "overlappingControls": 0,
+          "brokenMedia": 0,
+          "uxHygieneSmells": 0
+        },
+        "deadGaps": [],
+        "clippedText": [],
+        "horizontalOverflow": [],
+        "offViewportControls": [],
+        "overlappingControls": [],
+        "brokenMedia": [],
+        "uxHygieneSmells": []
+      }
+    },
+    {
+      "viewport": "1440x900",
+      "state": "modal-open",
+      "pass": true,
+      "screenshot": "./arm-b-layer1-after/1440x900-modal-open.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "audit": {
+        "pass": true,
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "summary": {
+          "deadGaps": 0,
+          "clippedText": 0,
+          "horizontalOverflow": 0,
+          "offViewportControls": 0,
+          "overlappingControls": 0,
+          "brokenMedia": 0,
+          "uxHygieneSmells": 0
+        },
+        "deadGaps": [],
+        "clippedText": [],
+        "horizontalOverflow": [],
+        "offViewportControls": [],
+        "overlappingControls": [],
+        "brokenMedia": [],
+        "uxHygieneSmells": []
+      }
+    },
+    {
+      "viewport": "390x844",
+      "state": "initial",
+      "pass": true,
+      "screenshot": "./arm-b-layer1-after/390x844-initial.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "audit": {
+        "pass": true,
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "summary": {
+          "deadGaps": 0,
+          "clippedText": 0,
+          "horizontalOverflow": 0,
+          "offViewportControls": 0,
+          "overlappingControls": 0,
+          "brokenMedia": 0,
+          "uxHygieneSmells": 0
+        },
+        "deadGaps": [],
+        "clippedText": [],
+        "horizontalOverflow": [],
+        "offViewportControls": [],
+        "overlappingControls": [],
+        "brokenMedia": [],
+        "uxHygieneSmells": []
+      }
+    }
+  ]
+}

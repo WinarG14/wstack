@@ -1,0 +1,319 @@
+{
+  "url": "http://127.0.0.1:4191",
+  "timestamp": "2026-11-24T18:06:19.739Z",
+  "overallPass": false,
+  "states": [
+    {
+      "viewport": "1440x900",
+      "state": "initial",
+      "pass": false,
+      "screenshot": "./evidence-before/1440x900-initial.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [],
+      "audit": {
+        "pass": false,
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "summary": {
+          "deadGaps": 1,
+          "clippedText": 2,
+          "horizontalOverflow": 0,
+          "offViewportControls": 0,
+          "overlappingControls": 1,
+          "brokenMedia": 0,
+          "uxHygieneSmells": 11
+        },
+        "deadGaps": [
+          {
+            "kind": "invisible_height_reservation",
+            "el": "div#bulkBanner",
+            "height": 56,
+            "top": 211,
+            "opacity": "0",
+            "visibility": "visible"
+          }
+        ],
+        "clippedText": [
+          {
+            "el": "span.status-pill",
+            "display": "inline-flex",
+            "textOverflow": "clip",
+            "scrollWidth": 160,
+            "clientWidth": 82,
+            "text": "PENDING_L2_APPROVAL"
+          },
+          {
+            "el": "span.status-pill",
+            "display": "inline-flex",
+            "textOverflow": "clip",
+            "scrollWidth": 160,
+            "clientWidth": 82,
+            "text": "PENDING_L2_APPROVAL"
+          }
+        ],
+        "horizontalOverflow": [],
+        "offViewportControls": [],
+        "overlappingControls": [
+          {
+            "a": "button#exportBtn (\"Export CSV\")",
+            "b": "button#resetBtn (\"Reset Filters\")",
+            "overlapPx": {
+              "x": 14,
+              "y": 33
+            }
+          }
+        ],
+        "brokenMedia": [],
+        "uxHygieneSmells": [
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_8a14c2f9"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-20T09:14:22.000Z"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_3d91b7e2"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-21T14:35:00.000Z"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_5c72a0b4"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-22T03:05:11.000Z"
+          },
+          {
+            "kind": "raw_internal_enum",
+            "el": "span.status-pill",
+            "sample": "PENDING_L2_APPROVAL"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_9f3a21c0"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-23T17:42:00.000Z"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_1b44e8d1"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-19T11:20:45.000Z"
+          }
+        ]
+      }
+    },
+    {
+      "viewport": "390x844",
+      "state": "initial",
+      "pass": false,
+      "screenshot": "./evidence-before/390x844-initial.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "audit": {
+        "pass": false,
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "summary": {
+          "deadGaps": 1,
+          "clippedText": 2,
+          "horizontalOverflow": 1,
+          "offViewportControls": 8,
+          "overlappingControls": 1,
+          "brokenMedia": 0,
+          "uxHygieneSmells": 11
+        },
+        "deadGaps": [
+          {
+            "kind": "invisible_height_reservation",
+            "el": "div#bulkBanner",
+            "height": 56,
+            "top": 244,
+            "opacity": "0",
+            "visibility": "visible"
+          }
+        ],
+        "clippedText": [
+          {
+            "el": "span.status-pill",
+            "display": "inline-flex",
+            "textOverflow": "clip",
+            "scrollWidth": 160,
+            "clientWidth": 82,
+            "text": "PENDING_L2_APPROVAL"
+          },
+          {
+            "el": "span.status-pill",
+            "display": "inline-flex",
+            "textOverflow": "clip",
+            "scrollWidth": 160,
+            "clientWidth": 82,
+            "text": "PENDING_L2_APPROVAL"
+          }
+        ],
+        "horizontalOverflow": [
+          {
+            "el": "documentElement",
+            "scrollWidth": 984,
+            "viewportWidth": 390,
+            "overflowPx": 594
+          }
+        ],
+        "offViewportControls": [
+          {
+            "el": "input#searchInput",
+            "text": "",
+            "left": 704,
+            "right": 984,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn.danger",
+            "text": "Delete",
+            "left": 760,
+            "right": 813,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn.danger",
+            "text": "Delete",
+            "left": 760,
+            "right": 813,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn",
+            "text": "Approve",
+            "left": 760,
+            "right": 823,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn.danger",
+            "text": "Delete",
+            "left": 829,
+            "right": 881,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn",
+            "text": "Approve",
+            "left": 760,
+            "right": 823,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn.danger",
+            "text": "Delete",
+            "left": 829,
+            "right": 881,
+            "viewportWidth": 390
+          },
+          {
+            "el": "button.row-btn.danger",
+            "text": "Delete",
+            "left": 760,
+            "right": 813,
+            "viewportWidth": 390
+          }
+        ],
+        "overlappingControls": [
+          {
+            "a": "button#exportBtn (\"Export CSV\")",
+            "b": "button#resetBtn (\"Reset Filters\")",
+            "overlapPx": {
+              "x": 14,
+              "y": 48
+            }
+          }
+        ],
+        "brokenMedia": [],
+        "uxHygieneSmells": [
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_8a14c2f9"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-20T09:14:22.000Z"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_3d91b7e2"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-21T14:35:00.000Z"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_5c72a0b4"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-22T03:05:11.000Z"
+          },
+          {
+            "kind": "raw_internal_enum",
+            "el": "span.status-pill",
+            "sample": "PENDING_L2_APPROVAL"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_9f3a21c0"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-23T17:42:00.000Z"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td",
+            "sample": "exp_1b44e8d1"
+          },
+          {
+            "kind": "raw_iso_timestamp",
+            "el": "td",
+            "sample": "2026-11-19T11:20:45.000Z"
+          }
+        ]
+      }
+    }
+  ]
+}

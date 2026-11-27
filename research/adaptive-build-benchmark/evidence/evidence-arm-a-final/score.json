@@ -1,0 +1,120 @@
+{
+  "armDir": "./arm-a-baseline",
+  "totalFixed": 10,
+  "totalSeeded": 12,
+  "byCategory": {
+    "logic": 4,
+    "visual": 3,
+    "ux": 3
+  },
+  "results": {
+    "V1_dead_whitespace": {
+      "fixed": true,
+      "detail": {
+        "desktopDeadGaps": 0,
+        "mobileDeadGaps": 0
+      }
+    },
+    "V2_clipped_pills": {
+      "fixed": true,
+      "detail": {
+        "desktopClipped": 0,
+        "mobileClipped": 0
+      }
+    },
+    "V3_mobile_overflow": {
+      "fixed": false,
+      "detail": {
+        "overflow": 0,
+        "offViewport": 9
+      }
+    },
+    "V4_overlapping_controls": {
+      "fixed": true,
+      "detail": {
+        "desktopOverlap": 0,
+        "mobileOverlap": 0
+      }
+    },
+    "U2_human_readable_ui": {
+      "fixed": false,
+      "detail": {
+        "remainingRawSmells": 5,
+        "sample": [
+          {
+            "kind": "raw_internal_id",
+            "el": "td.cell-id",
+            "sample": "exp_8a14c2f9"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td.cell-id",
+            "sample": "exp_3d91b7e2"
+          },
+          {
+            "kind": "raw_internal_id",
+            "el": "td.cell-id",
+            "sample": "exp_5c72a0b4"
+          }
+        ]
+      }
+    },
+    "B2_kpi_calculation": {
+      "fixed": true,
+      "detail": {
+        "kpiApprovedText": "$1,842.30"
+      }
+    },
+    "U4_hierarchy_and_modal_esc": {
+      "fixed": true,
+      "detail": {
+        "ctaDistinct": true,
+        "kpiProminent": true,
+        "nBg": "rgb(37, 99, 235)",
+        "rBg": "rgba(0, 0, 0, 0)",
+        "lSize": 12,
+        "vSize": 26,
+        "lWt": 600,
+        "vWt": 700,
+        "modalClosedOnEsc": true
+      }
+    },
+    "B1_async_filter_race": {
+      "fixed": true,
+      "detail": {
+        "hasApproved": true,
+        "leakedPending": false
+      }
+    },
+    "B3_create_expense_contract": {
+      "fixed": true,
+      "detail": {
+        "postStatus": 201,
+        "persistedAfterReload": true
+      }
+    },
+    "B4_combined_filter_and_approve_persist": {
+      "fixed": true,
+      "detail": {
+        "combinedFilterOk": true,
+        "approvePersistedInApprovedTab": true
+      }
+    },
+    "U3_empty_state_and_loading_guard": {
+      "fixed": true,
+      "detail": {
+        "emptyStateHelpful": true,
+        "hasSubmitDisableGuard": true
+      }
+    },
+    "U1_destructive_delete_guard": {
+      "fixed": true,
+      "detail": {
+        "sawNativeConfirm": true,
+        "beforeRows": 6,
+        "afterRows": 6,
+        "hasUndoOrConfirmText": false
+      }
+    }
+  }
+}
