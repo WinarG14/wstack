@@ -1,5 +1,5 @@
 // Project-Agnostic $0 DOM Geometry, Accessibility & UX Hygiene Oracle (Layer 1 of adaptive-build).
-// Inject via scripts/browser_audit.mjs, or paste into the browser DevTools console.
+// Inject via scripts/browser_audit.mjs. In DevTools: paste the file wrapped as `(<file>)(document.body, {})`.
 // Returns structured JSON with pass/fail and exact elements + coordinates.
 (function adaptiveUiGeometryAudit(rootEl, options) {
   if (typeof document.getAnimations === 'function') {

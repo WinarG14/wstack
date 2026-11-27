@@ -6,6 +6,12 @@
  *   node browser_audit.mjs --url http://127.0.0.1:4100 --out ./evidence \
  *     [--viewports 1440x900,390x844] [--actions ./actions.json]
  *
+ * actions.json: a list run in order after the "initial" state. Each action gets its own state.
+ *   [{ "name": "modal-open", "click": "#newBtn" },
+ *    { "name": "mobile-search", "viewport": "390x844", "fill": { "selector": "#q", "value": "zzzz" } },
+ *    { "name": "modal-esc", "press": "Escape", "waitMs": 500 }]
+ *   An action without "viewport" runs on the first viewport only.
+ *
  * Captures:
  *   - Multi-viewport PNG screenshots + optional interactive state PNGs
  *   - Layer 1 DOM Geometry & UX Hygiene Oracle JSON per state
@@ -134,6 +140,9 @@ async function runAudit() {
             state: act.name || 'action',
             pass: false,
             actionError: String(err),
+            consoleErrors: consoleErrors.splice(0),
+            pageErrors: pageErrors.splice(0),
+            failedRequests: failedRequests.splice(0),
           });
         }
       }

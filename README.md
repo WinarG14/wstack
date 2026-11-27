@@ -71,7 +71,7 @@ npm i -g playwright && npx playwright install chromium
 - Optional, for visual craft: [taste-skill](https://github.com/leonxlnx/taste-skill) (`design-taste-frontend`) or any UI review skill
 - For the councils: a harness that can run models from other providers. [T3 Code](https://github.com/pingdotgg/t3code) does this with `delegate_task`.
 
-If one is missing, the skill still runs. The triage output ends with a `Not installed:` line, and `SKILL.md` has a fallback row for each skill (for example: no `sol-loop` means one fresh reviewer from another model family, 2 rounds at most). The agent must say in its report which fallbacks it used. The full tier flow works best with all three packs installed.
+If one is missing, the skill still runs. The triage output adds a `Not installed:` line under `RUN:`, and `SKILL.md` has a fallback row for each skill (for example: no `sol-loop` means one fresh reviewer from another model family, 2 rounds at most). The agent must say in its report which fallbacks it used. The full tier flow works best with all three packs installed.
 
 ## Make it yours
 

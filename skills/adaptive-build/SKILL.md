@@ -25,7 +25,7 @@ python3 <skill_dir>/scripts/adaptive_triage.py \
   [--failed-attempts <n>] [--json]
 ```
 
-The output ends with a `Not installed:` line when a skill this file calls is missing. For each one, use its row in **If a skill is not installed** below. Never skip the step silently.
+Under `RUN:`, the output adds a `Not installed:` line when a skill this file calls is missing. For each one, use its row in **If a skill is not installed** below. Never skip the step silently.
 
 Announce in 2 lines: detected **Tier (1/2/3)**, **Stack (FE / BE / Full-Stack / CLI)**, exact tools you will run, and what you are skipping to save tokens.
 
@@ -34,11 +34,11 @@ Announce in 2 lines: detected **Tier (1/2/3)**, **Stack (FE / BE / Full-Stack / 
 | Tier | Auto-Trigger | Upfront & Build | Review & Verification (Zero Stacking) |
 |---|---|---|---|
 | **Tier 1: LEAN** (~USD 0.50-3, 2-5 min, auto-start) | 1-4 non-test files, 1 module/directory, low caller fan-out, no API/DB/auth/schema boundary, no async/concurrency primitives, not a hotfix. | Quick local code read. Build with `ponytail` (full): smallest complete diff, reuse existing helpers/components, 1 focused behavior test for non-trivial logic. | Run `ponytail-review` (~USD 0.50-1) OR 1 `sol-loop` (max 2 rounds, stop on nits). If UI files changed: run **Layer 1 (zero-cost DOM Oracle)** + quick **Layer 2 (~USD 0.20 Blind Visual & Heuristic Critic)**. **Skip:** `/pstack:how`, `/architect`, `/statechart`, `/interrogate`, `/council`. |
-| **Tier 2: TARGETED RIGOR** (~USD 4-10, 8-15 min, auto-start with 1-line heads-up) | **ANY 1:** shared module with >=2 caller modules, API/schema/DB/auth/config boundary, 5-14 files, bug fix or production hotfix, async/timers/streaming/concurrency, or multi-state interactive UI. | **Fuzzy brief?** Run `/pstack:reframe` + `/pstack:sharpen` first. **Bug/hotfix?** Reproduce on the real artifact before patching (`Fix Root Causes`). **Feature:** `/pstack:how` (1 read-only explorer for real callers & data owner; `/pstack:why` if legacy code looks odd) + Layer 0 real payload/DOM capture (never invent simplified mocks) -> **5-bullet Design Lock** (proceed immediately under autonomous grants; pause only on irreversible/product forks). Build with `ponytail` discipline in verifiable commits. | `ponytail-review` lean trim -> **2-Model Fast Council** (2 distinct providers at High effort, e.g., Gemini 4 Neon High + GPT-6.2-Sol High, **max 2 rounds**; hold 3rd Opus seat only for disputed blockers) -> if risky BE/shared logic, `/pstack:blast-radius` (prove the one safety fact by running code). If UI changed: **Layer 1 (zero-cost DOM Oracle)** across desktop + mobile + interactive states -> **Layer 2 (~USD 0.20 Blind Visual & Heuristic Critic)** -> auto-fix Bucket A hygiene + list Bucket B recommendations. |
+| **Tier 2: TARGETED RIGOR** (~USD 4-10, 8-15 min, auto-start with 1-line heads-up) | **ANY 1:** shared module (a `shared/`, `common/`, `utils/`, `lib/`, `core/`-style path, or code used from >=2 other modules), API/schema/DB/auth/config boundary, 5-14 files, bug fix or production hotfix, async/timers/streaming/concurrency, or multi-state interactive UI. | **Fuzzy brief?** Run `/pstack:reframe` + `/pstack:sharpen` first. **Bug/hotfix?** Reproduce on the real artifact before patching (`Fix Root Causes`). **Feature:** `/pstack:how` (1 read-only explorer for real callers & data owner; `/pstack:why` if legacy code looks odd) + Layer 0 real payload/DOM capture (never invent simplified mocks) -> **5-bullet Design Lock** (proceed immediately under autonomous grants; pause only on irreversible/product forks). Build with `ponytail` discipline in verifiable commits. | `ponytail-review` lean trim -> **2-Model Fast Council** (2 distinct providers at High effort, e.g., Gemini 4 Neon High + GPT-6.2-Sol High, **max 2 rounds**; hold 3rd Opus seat only for disputed blockers) -> if risky BE/shared logic, `/pstack:blast-radius` (prove the one safety fact by running code). If UI changed: **Layer 1 (zero-cost DOM Oracle)** across desktop + mobile + interactive states -> **Layer 2 (~USD 0.20 Blind Visual & Heuristic Critic)** -> auto-fix Bucket A hygiene + list Bucket B recommendations. |
 | **Tier 3: FULL RIGOR** (~USD 12-25+, 20-40 min, ask human first unless autonomous) | **ANY 1:** >=4 modules or >=15 files, complex state machine/multi-tab races, 3+ combined risk dimensions, security/auth/money/migration critical path, or **2+ failed fix attempts**. | Tier 2 + `/pstack:architect` (2 competing sketches, single state owner, clean boundaries) + `/pstack:statechart` (ONLY for async/protocol/state-machine logic). For multi-part unattended migrations, design the run with `/pstack:figure-it-out`. | Tier 2 + `/pstack:blast-radius` + full **3-Model Council** (Gemini 4 Neon High + GPT-6.2-Sol High + Claude Opus 5.5 High, **HARD CAP 3 rounds**; for BE/security/algorithms prefer runnable `/pstack:interrogate` proof over static prose). If UI changed: add **Layer 3 Chartered Exploratory UX Pass** (SBTM). |
 
 **Auto-escalation tripwires:**
-- Tier 1 touches a shared file (>=2 caller modules), API/schema boundary, or async timing -> escalate to Tier 2 immediately and state why in 1 line.
+- Tier 1 touches a shared file (shared-style path, or used from >=2 other modules), API/schema boundary, or async timing -> escalate to Tier 2 immediately and state why in 1 line.
 - **Circuit breaker (Attack the Premise):** 2 fix attempts fail the same check or introduce new bugs in the same area -> **STOP patching**, write down the hidden assumption, test it directly, and escalate to Tier 3 / human.
 
 ---
@@ -116,6 +116,8 @@ node <skill_dir>/scripts/browser_audit.mjs \
   --viewports 1440x900,390x844 \
   [--actions <actions.json>]
 ```
+
+`actions.json` is a list of steps, each saved as its own state: `name`, optional `viewport` (for example `"390x844"`; without it the step runs on the first viewport), and any of `click` (selector), `fill` (`{ "selector", "value" }`) or `press` (key), plus optional `waitMs`.
 
 Auto-fails on:
 - Invisible in-flow layout reservations (`opacity: 0` / `visibility: hidden` >= 16px) or abnormal dead vertical gaps (> 48px)

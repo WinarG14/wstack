@@ -130,9 +130,9 @@ def get_changed_files(repo: Path, base_ref: str, review_whole_repo: bool = False
             merge_base = out.strip()
     files: Set[str] = set()
     if merge_base:
-        rc, diff_out = run_git(repo, ["diff", "--name-only", f"{merge_base}...HEAD"])
+        rc, diff_out = run_git(repo, ["diff", "--name-only", "-z", f"{merge_base}...HEAD"])
         if rc == 0 and diff_out:
-            files.update(line.strip() for line in diff_out.splitlines() if line.strip())
+            files.update(p for p in diff_out.split("\0") if p)
     rc_st, st_out = run_git(repo, ["status", "--porcelain", "-z", "--untracked-files=all"])
     if rc_st == 0 and st_out:
         entries = st_out.split("\0")
@@ -147,9 +147,9 @@ def get_changed_files(repo: Path, base_ref: str, review_whole_repo: bool = False
                 i += 1
     # Review mode on a clean tree with no branch diff: inspect a small repo's tracked files
     if not files and review_whole_repo and repo.is_dir():
-        rc_ls, ls_out = run_git(repo, ["ls-files"])
+        rc_ls, ls_out = run_git(repo, ["ls-files", "-z"])
         if rc_ls == 0 and ls_out:
-            tracked = [l.strip() for l in ls_out.splitlines() if l.strip()]
+            tracked = [p for p in ls_out.split("\0") if p]
             if len(tracked) <= 40:
                 files.update(tracked)
     return sorted(files), merge_base
@@ -332,7 +332,9 @@ def recommend(args: argparse.Namespace) -> Dict:
 
     if args.kind == "review":
         run_tools = ["Review mode: read-only, skip Upfront/Build/Design Lock"] + [
-            s for s in run_tools if not s.startswith(("Upfront:", "Build:"))
+            s.replace("auto-fix Bucket A", "report Bucket A")
+            for s in run_tools
+            if not s.startswith(("Upfront:", "Build:"))
         ]
 
     missing = missing_skills()
