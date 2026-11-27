@@ -99,11 +99,18 @@
   }
 
   // 2. Clipped text (leaf overflow or inline-flex/flex nowrap overflowing without ellipsis).
+  const isVisuallyHiddenSrOnly = (el, cs) => {
+    const r = el.getBoundingClientRect();
+    const tinyClip = r.width <= 1.5 && r.height <= 1.5 && (cs.overflow === 'hidden' || cs.overflowX === 'hidden');
+    const clipPathHidden = cs.clipPath && /inset\(\s*50%/.test(cs.clipPath);
+    const clipRectHidden = cs.clip && /rect\(\s*0(px)?\s*,\s*0(px)?\s*,\s*0(px)?\s*,\s*0(px)?\s*\)/.test(cs.clip);
+    return tinyClip || clipPathHidden || clipRectHidden;
+  };
   const clippedText = [];
   for (const el of root.querySelectorAll('*')) {
     if (!isShownBox(el)) continue;
     const cs = getComputedStyle(el);
-    if (parseFloat(cs.opacity) === 0 || cs.visibility === 'hidden') continue;
+    if (parseFloat(cs.opacity) === 0 || cs.visibility === 'hidden' || isVisuallyHiddenSrOnly(el, cs)) continue;
     const text = (el.textContent || '').trim();
     if (!text) continue;
     const isLeaf = el.children.length === 0;

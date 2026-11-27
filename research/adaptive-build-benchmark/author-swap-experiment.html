@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>2x2 Author-Swap Benchmark: Sol + Neon Wins Regardless of Implementor</title>
+<style>
+:root {
+  --page: #f8f9fb;
+  --surface: #ffffff;
+  --ink: #14181f;
+  --ink2: #5b6472;
+  --line: #e4e7ec;
+  --win: #059669;
+  --win-soft: #ecfdf5;
+  --swap: #2563eb;
+  --swap-soft: #eff6ff;
+  --sol: #7c3aed;
+  --red: #dc2626;
+  --red-soft: #fef2f2;
+  --slate: #94a3b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--page);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  width: 1260px;
+  padding: 28px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px 32px 24px;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--win);
+  margin-bottom: 6px;
+}
+h1 {
+  font-size: 24px;
+  font-weight: 750;
+  line-height: 1.24;
+  letter-spacing: -0.015em;
+}
+.sub {
+  font-size: 13.5px;
+  color: var(--ink2);
+  margin-top: 6px;
+  line-height: 1.45;
+}
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+.kpi {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 13px 15px;
+  background: #fbfcfe;
+}
+.kpi.win {
+  background: var(--win-soft);
+  border-color: #a7f3d0;
+}
+.kpi-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.kpi-val {
+  font-size: 21px;
+  font-weight: 750;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-note {
+  font-size: 11.5px;
+  color: var(--ink2);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 22px;
+}
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  background: #ffffff;
+}
+h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.h2sub {
+  font-size: 12px;
+  color: var(--ink2);
+  margin-bottom: 13px;
+  line-height: 1.35;
+}
+.group-hdr {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink2);
+  margin: 10px 0 8px;
+}
+.group-hdr:first-of-type { margin-top: 0; }
+.bar-row {
+  display: grid;
+  grid-template-columns: 182px 1fr 78px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.bar-row:last-child { margin-bottom: 0; }
+.lbl {
+  font-size: 12.5px;
+  line-height: 1.25;
+}
+.lbl b { font-weight: 700; }
+.lbl small {
+  display: block;
+  font-size: 11px;
+  color: var(--ink2);
+  margin-top: 1px;
+}
+.track {
+  height: 22px;
+  background: #f1f5f9;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+}
+.fill-note {
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+.val {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.val small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink2);
+}
+.divider {
+  border-top: 1px dashed var(--line);
+  margin: 11px 0;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 11.5px;
+  color: var(--ink2);
+  margin-bottom: 11px;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1.38fr 1fr;
+  gap: 24px;
+  margin-top: 18px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+th, td {
+  text-align: left;
+  padding: 7px 7px;
+  border-bottom: 1px solid #eef0f4;
+  font-variant-numeric: tabular-nums;
+}
+tr:last-child td { border-bottom: none; }
+th {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ink2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: #f8fafc;
+}
+td.num, th.num { text-align: right; white-space: nowrap; }
+td.arm-col { white-space: nowrap; }
+.pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.pill.win { background: var(--win-soft); color: var(--win); }
+.pill.swap { background: var(--swap-soft); color: var(--swap); }
+.pill.ref { background: #f1f5f9; color: #475569; }
+.pill.bad { background: var(--red-soft); color: var(--red); }
+.endstate {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  border: 1.5px solid #86efac;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.step-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.step-list li {
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+}
+.step-list li b { color: var(--ink); }
+.foot {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--ink2);
+  line-height: 1.5;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">2x2 Controlled Benchmark (27-28 Nov 2026) | Both Implementor Families Tested</div>
+  <h1>GPT-6.2-Sol + Gemini 4 Neon won 2-for-2 regardless of implementor, at roughly half the council cost</h1>
+  <div class="sub">Two independent full-stack SpendPulse builds (S0 by Gemini 4 Neon High, 27 verified defects; S1 by GPT-6.2-Sol High, 26 verified defects), each forked into paired Tier 2 Fast Councils comparing Sol + Neon vs swapping in Claude Opus 5.5 (all seats verified High effort).</div>
+
+  <div class="kpi-strip">
+    <div class="kpi win">
+      <div class="kpi-lbl">Neon Author (S0) Recall</div>
+      <div class="kpi-val">96.3% vs 92.6%</div>
+      <div class="kpi-note">Arm E (Neon+Sol: 26/27) beat Arm D (Opus+Sol: 25/27) at 45% lower council cost</div>
+    </div>
+    <div class="kpi win">
+      <div class="kpi-lbl">Sol Author (S1) Recall</div>
+      <div class="kpi-val">96.2% vs 73.1%</div>
+      <div class="kpi-note">Arm G (Sol+Neon: 25/26) beat Arm F (Opus+Neon: 19/26) by +23.1 pts; Arm F added 1 regression</div>
+    </div>
+    <div class="kpi win">
+      <div class="kpi-lbl">Council Cost Efficiency</div>
+      <div class="kpi-val">$0.043 vs $0.102</div>
+      <div class="kpi-note">Average USD per verified defect: Sol + Neon ($1.06-$1.14) vs Opus swap ($2.09-$2.29)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Best End-State Run</div>
+      <div class="kpi-val">Arm G: $3.40</div>
+      <div class="kpi-note">Sol build -> L1/L2 -> Sol+Neon -> Sol fix: 1,187 s, 96.2% recall, 0 regressions, leanest diff</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Verified Defect Recall: 2x2 Council Comparison</h2>
+      <div class="h2sub">Executable-proven defects caught before fix pass (Sol + Neon wins under both authors)</div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--win)"></i>Default Spec (Sol + Neon)</span>
+        <span><i class="sw" style="background:var(--swap)"></i>Author-Swap (with Opus)</span>
+        <span><i class="sw" style="background:var(--sol)"></i>Sol Solo</span>
+      </div>
+
+      <div class="group-hdr">Experiment 1: Gemini 4 Neon (High) authored S0 (27 defects)</div>
+      <div class="bar-row">
+        <div class="lbl"><b>Arm E: Neon + Sol</b><small>Default Spec (winner)</small></div>
+        <div class="track"><div class="fill" style="width:96.3%;background:var(--win)">26 / 27 (96.3%)</div></div>
+        <div class="val">96.3%<small>23/24 QA</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Arm D: Opus + Sol<small>Author-Swap</small></div>
+        <div class="track"><div class="fill" style="width:92.6%;background:var(--swap)">25 / 27 (92.6%)</div></div>
+        <div class="val">92.6%<small>22/24 QA</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Solo seats on S0<small>Sol 24 | Opus 18 | Neon 15</small></div>
+        <div class="track"><div class="fill" style="width:88.9%;background:var(--sol)">24 / 27 (88.9%)</div></div>
+        <div class="val">24 / 27<small>6/6 misses</small></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="group-hdr">Experiment 2: GPT-6.2-Sol (High) authored S1 (26 defects)</div>
+      <div class="bar-row">
+        <div class="lbl"><b>Arm G: Sol + Neon</b><small>Default Spec (winner)</small></div>
+        <div class="track"><div class="fill" style="width:96.2%;background:var(--win)">25 / 26 (96.2%)</div></div>
+        <div class="val">96.2%<small>17/18 QA</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Arm F: Opus + Neon<small>Author-Swap (1 regression)</small></div>
+        <div class="track"><div class="fill" style="width:73.1%;background:var(--swap)">19 / 26 (73.1%)</div></div>
+        <div class="val">73.1%<small>14/18 QA</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Solo seats on S1<small>Sol 18 | Neon 17 | Opus 14</small></div>
+        <div class="track"><div class="fill" style="width:69.2%;background:var(--sol)">18 / 26 (69.2%)</div><div class="fill-note">+7 by Neon</div></div>
+        <div class="val">18 / 26<small>Sol solo</small></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Measured Cost (USD): Council Only vs Full End-to-End</h2>
+      <div class="h2sub">Measured child-run tokens multiplied by public API list rates (25 Nov refs included)</div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--win)"></i>Sol + Neon Council</span>
+        <span><i class="sw" style="background:var(--swap)"></i>Opus-Swap Council</span>
+        <span><i class="sw" style="background:#cbd5e1"></i>Build + L2 + Fix</span>
+      </div>
+
+      <div class="group-hdr">Council Only (2 Parallel Seats)</div>
+      <div class="bar-row">
+        <div class="lbl"><b>Arm G: Sol + Neon (S1)</b><small>$0.49 Sol + $0.57 Neon (288 s)</small></div>
+        <div class="track"><div class="fill" style="width:17.1%;background:var(--win)"></div><div class="fill-note">54% cheaper than Arm F</div></div>
+        <div class="val">$1.06<small>$0.042/bug</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><b>Arm E: Neon + Sol (S0)</b><small>$0.61 Neon + $0.54 Sol (280 s)</small></div>
+        <div class="track"><div class="fill" style="width:18.4%;background:var(--win)"></div><div class="fill-note">45% cheaper than Arm D</div></div>
+        <div class="val">$1.14<small>$0.044/bug</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Arm D: Opus + Sol (S0)<small>$1.54 Opus + $0.55 Sol (250 s)</small></div>
+        <div class="track"><div class="fill" style="width:33.8%;background:var(--swap)"></div><div class="fill-note">1.83x Arm E</div></div>
+        <div class="val">$2.09*<small>$0.084/bug</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Arm F: Opus + Neon (S1)<small>$1.59 Opus + $0.70 Neon (341 s)</small></div>
+        <div class="track"><div class="fill" style="width:37.0%;background:var(--swap)"></div><div class="fill-note">2.16x Arm G</div></div>
+        <div class="val">$2.29*<small>$0.121/bug</small></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="group-hdr">Full End-to-End (Build + L2 + Council + Fix) vs 25 Nov Ref</div>
+      <div class="bar-row">
+        <div class="lbl"><b>Arm G (Sol -&gt; Sol+Neon)</b><small>1,187 s total | 1,733 diff lines</small></div>
+        <div class="track"><div class="fill" style="width:17.1%;background:var(--win)"></div><div class="fill" style="width:37.8%;background:#bbf7d0"></div><div class="fill-note">Lowest total $</div></div>
+        <div class="val">$3.40<small>Best overall</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><b>Arm E (Neon -&gt; Neon+Sol)</b><small>1,495 s total | 2,359 diff lines</small></div>
+        <div class="track"><div class="fill" style="width:18.4%;background:var(--win)"></div><div class="fill" style="width:43.8%;background:#bbf7d0"></div></div>
+        <div class="val">$3.85<small>Close 2nd</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">Arm F / Arm D (Opus swap)<small>Arm F $3.95 | Arm D $4.52</small></div>
+        <div class="track"><div class="fill" style="width:33.8%;background:var(--swap)"></div><div class="fill" style="width:39.2%;background:#bfdbfe"></div></div>
+        <div class="val">$3.95-$4.52<small>Higher $</small></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl">25 Nov Arm C (3-Model Ref)<small>Opus + Sol + Neon, 2 rds</small></div>
+        <div class="track"><div class="fill" style="width:100%;background:#cbd5e1;color:#1e293b">10/12 fixed, unfinished, 1 blocker</div></div>
+        <div class="val">$6.19+<small>Ref</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="panel">
+      <h2>Complete 2x2 Scorecard (Measured Across All 4 Paired Arms + Baselines)</h2>
+      <div class="h2sub">Zero factual false positives across all 8 council runs; Layer 1 DOM Oracle passed 10/10 on all 4 final arms</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Arm / Mode</th>
+            <th class="num">Recall</th>
+            <th class="num">Seeded</th>
+            <th class="num">Tier 2 QA</th>
+            <th class="num">Council $</th>
+            <th class="num">E2E $</th>
+            <th class="num">Reg.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="arm-col"><span class="pill win">Arm G</span> Sol -&gt; <b>Sol + Neon</b></td>
+            <td class="num"><b>96.2%</b></td>
+            <td class="num">11/12**</td>
+            <td class="num"><b>17/18</b></td>
+            <td class="num"><b>$1.06</b></td>
+            <td class="num"><b>$3.40</b></td>
+            <td class="num">0</td>
+          </tr>
+          <tr>
+            <td class="arm-col"><span class="pill win">Arm E</span> Neon -&gt; <b>Neon + Sol</b></td>
+            <td class="num"><b>96.3%</b></td>
+            <td class="num"><b>12/12</b></td>
+            <td class="num"><b>23/24</b></td>
+            <td class="num"><b>$1.14</b></td>
+            <td class="num">$3.85</td>
+            <td class="num">0</td>
+          </tr>
+          <tr>
+            <td class="arm-col"><span class="pill swap">Arm D</span> Neon -&gt; Opus + Sol</td>
+            <td class="num">92.6%</td>
+            <td class="num">12/12</td>
+            <td class="num">22/24</td>
+            <td class="num">$2.09*</td>
+            <td class="num">$4.52*</td>
+            <td class="num">0</td>
+          </tr>
+          <tr>
+            <td class="arm-col"><span class="pill swap">Arm F</span> Sol -&gt; Opus + Neon</td>
+            <td class="num">73.1%</td>
+            <td class="num">10/12</td>
+            <td class="num">14/18</td>
+            <td class="num">$2.29*</td>
+            <td class="num">$3.95*</td>
+            <td class="num"><span class="pill bad">1 (B3)</span></td>
+          </tr>
+          <tr>
+            <td class="arm-col"><span class="pill ref">Ref B</span> 25 Nov Tier 2 (pre-seed)</td>
+            <td class="num">n/a</td>
+            <td class="num">12/12</td>
+            <td class="num">n/a</td>
+            <td class="num">$0.73</td>
+            <td class="num">$1.53</td>
+            <td class="num">0</td>
+          </tr>
+          <tr>
+            <td class="arm-col"><span class="pill ref">Ref C</span> 25 Nov 3-Model Council</td>
+            <td class="num">n/a</td>
+            <td class="num">10/12</td>
+            <td class="num">n/a</td>
+            <td class="num">$5.55</td>
+            <td class="num">$6.19+</td>
+            <td class="num"><span class="pill bad">1</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="endstate">
+      <h2>End-State Optimized /adaptive-build</h2>
+      <div class="h2sub" style="margin-bottom:6px">Evidence-locked architecture across Tiers 1, 2, and 3</div>
+      <ul class="step-list">
+        <li><b>1. Implementor (Build &amp; Fix):</b> <b>GPT-6.2-Sol (High)</b> for lowest cost ($3.40), fastest runtime, and leanest diffs on logic/API/full-stack work; <b>Gemini 4 Neon (High)</b> equally strong on UI-heavy builds ($3.85).</li>
+        <li><b>2. UI Gate (when UI changes):</b> Layer 1 DOM Oracle ($0, with <code>.visually-hidden</code> fix) + Layer 2 Blind Visual Critic (<code>gemini-3.8-flash</code>, ~$0.05).</li>
+        <li><b>3. Tier 2 Fast Council (LOCKED):</b> <b>GPT-6.2-Sol (High) + Gemini 4 Neon (High)</b> regardless of implementor (~$1.06-$1.14, ~96% recall). Always cross-check Layer 1/2 findings against code.</li>
+        <li><b>4. Claude Opus 5.5 (High):</b> Tier 3 (3-Model Council) and disputed Tier 2 blockers only (explicit <code>thought_level: "high"</code> on Antigravity).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    * Antigravity Opus upper bound at 100% cache-write pricing ($6.25/1M): Arm D council $2.26 (E2E $4.69), Arm F council $2.45 (E2E $4.11). ** Arm G raw score 11/12 reflects score_arm.mjs U3 regex missing <code>control.disabled = busy</code> (12/12 functional). Parent coordinator overhead excluded identically across arms. Limits: n = 1 per cell on one synthetic app.<br>
+    Full 2x2 data and per-defect matrices: research/adaptive-build-benchmark/author-swap-results.md
+  </div>
+</div>
+</body>
+</html>

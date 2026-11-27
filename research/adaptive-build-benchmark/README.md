@@ -104,3 +104,10 @@ node research/adaptive-build-benchmark/score_arm.mjs --arm-dir /tmp/arm-x --port
 ```
 
 Design notes behind the skill (expert terms, neighbour fields, the sharpened brief): [`design-notes.md`](design-notes.md).
+
+## Follow-up: 2x2 Author-Swap Experiment (27-28 Nov 2026)
+
+Because Arm B above audited a pre-seeded app before Neon wrote code, we ran a controlled 2x2 follow-up testing **same-family self-review bias vs swapping in Claude Opus 5.5 (High)** across both **Gemini 4 Neon (High)** and **GPT-6.2-Sol (High)** implementors on fresh full-stack feature builds (Bulk Approve, Inline Reject with required reason, and filtered formula-safe CSV export).
+
+- **Winner under both authors:** **GPT-6.2-Sol (High) + Gemini 4 Neon (High)** achieved **96.3%** recall on Neon-authored code (USD 1.14 council vs USD 2.09 for Opus + Sol) and **96.2%** recall on Sol-authored code (USD 1.06 council vs USD 2.29 and 73.1% recall for Opus + Neon, which also introduced 1 regression).
+- Full per-defect matrices, 16-run token accounting, and end-state architecture: [`author-swap-results.md`](author-swap-results.md) and [`author-swap-experiment.html`](author-swap-experiment.html).

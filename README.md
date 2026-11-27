@@ -21,8 +21,8 @@ Good skill packs exist. The hard part is knowing **which one to run, and when to
    | Tier | When | Build | Review |
    |---|---|---|---|
    | 1 LEAN (~USD 0.5-3) | 1-4 files, one module, no boundary | `ponytail` smallest diff | `ponytail-review` **or** one `sol-loop` (max 2 rounds) |
-   | 2 TARGETED (~USD 4-10) | shared code, API/DB/auth, bug fix, async, 5-14 files | `/pstack:how` for real callers → 5-bullet design lock → `ponytail` | `ponytail-review` trim → 2-model fast council (2 providers, max 2 rounds) → `/pstack:blast-radius` when risky |
-   | 3 FULL (~USD 12-25) | 15+ files, state machines, security/money/migration, or 2 failed fixes | + `/pstack:architect`, `/pstack:statechart` | + full 3-model `/council` (cap 3 rounds) or `/pstack:interrogate` |
+   | 2 TARGETED (~USD 2.5-6) | shared code, API/DB/auth, bug fix, async, 5-14 files | `/pstack:how` for real callers -> 5-bullet design lock -> `ponytail` (GPT-6.2-Sol High or Gemini 4 Neon High) | `ponytail-review` trim -> **2-model fast council locked to GPT-6.2-Sol High + Gemini 4 Neon High regardless of implementor** (max 2 rounds, cross-checking Layer 1/2) -> `/pstack:blast-radius` when risky |
+   | 3 FULL (~USD 12-25) | 15+ files, state machines, security/money/migration, or 2 failed fixes | + `/pstack:architect`, `/pstack:statechart` | + full 3-model `/council` (Sol + Neon + Claude Opus 5.5 High, cap 3 rounds) or `/pstack:interrogate` |
 
    It escalates by itself when a Tier 1 change touches shared code or a contract. After two failed fixes in the same place it stops patching and tests the hidden assumption.
 3. **It looks at the screen.** Static review reads code, not pixels. When UI files change it runs:
@@ -46,6 +46,21 @@ We ran one fault-seeded benchmark: a small expense app with 12 planted defects (
 The short version: the same cost as no skill, all 12 fixed, and about 4x cheaper than the council. Six flagship static reviews missed 7 buttons off screen on mobile and raw DB IDs in the UI. The USD 0 DOM check found both in 4 seconds.
 
 Caveats: one run per arm on one synthetic app. 5 of the 12 checks use the skill's own geometry script. The `/adaptive-build` cost leaves out its parent session, and that run skipped `ponytail-review` and `/pstack:how`. Read the [limits](research/adaptive-build-benchmark/README.md#limits-read-before-you-quote-the-numbers) before you quote it.
+
+### Follow-up 2x2 study (27-28 Nov 2026): does Tier 2 need Opus when a council model wrote the code?
+
+We ran a paired 2x2 extension testing **same-family self-review bias vs author-swap with Claude Opus 5.5 (High)** across both implementor families (**Gemini 4 Neon High** and **GPT-6.2-Sol High**) on fresh SpendPulse feature builds (Bulk Approve, Inline Reject with required reason, and filtered formula-safe CSV export). Full matrices and token tables: [`author-swap-results.md`](research/adaptive-build-benchmark/author-swap-results.md).
+
+![2x2 Author-Swap Benchmark: Sol + Neon won 2-for-2 regardless of implementor at roughly half the council cost](research/adaptive-build-benchmark/author-swap-experiment.png)
+
+| Arm | Implementor | Fast Council (High) | Verified Recall | Council USD | End-to-End USD | Regressions |
+|---|---|---|---:|---:|---:|---:|
+| **Arm G (Default)** | GPT-6.2-Sol | **Sol + Neon** | **25/26 (96.2%)** | **$1.06** | **$3.40** | **0** |
+| Arm F (Swap) | GPT-6.2-Sol | Opus + Neon | 19/26 (73.1%) | $2.29* | $3.95* | 1 (`B3`) |
+| **Arm E (Default)** | Gemini 4 Neon | **Neon + Sol** | **26/27 (96.3%)** | **$1.14** | **$3.85** | **0** |
+| Arm D (Swap) | Gemini 4 Neon | Opus + Sol | 25/27 (92.6%) | $2.09* | $4.52* | 0 |
+
+Result: **GPT-6.2-Sol (High) + Gemini 4 Neon (High)** won 2-for-2 regardless of implementor (~96% recall at USD 1.06-1.14 council cost, zero regressions). Swapping in Claude Opus 5.5 cost roughly 2x more and, when replacing Sol (Arm F), dropped recall by 23.1 points and introduced a form contract regression. Tier 2 now explicitly locks in `Sol + Neon` and reserves Opus for Tier 3 and disputed blockers.
 
 ## Credits: the stacks it harmonizes, and how
 
