@@ -486,7 +486,7 @@ td.arm-col { white-space: nowrap; }
         <li><b>1. Implementor (Build &amp; Fix):</b> <b>GPT-6.2-Sol (High)</b> for lowest cost ($3.40), fastest runtime, and leanest diffs on logic/API/full-stack work; <b>Gemini 4 Neon (High)</b> equally strong on UI-heavy builds ($3.85).</li>
         <li><b>2. UI Gate (when UI changes):</b> Layer 1 DOM Oracle ($0, with <code>.visually-hidden</code> fix) + Layer 2 Blind Visual Critic (<code>gemini-3.8-flash</code>, ~$0.05).</li>
         <li><b>3. Tier 2 Fast Council (LOCKED):</b> <b>GPT-6.2-Sol (High) + Gemini 4 Neon (High)</b> regardless of implementor (~$1.06-$1.14, ~96% recall). Always cross-check Layer 1/2 findings against code.</li>
-        <li><b>4. Claude Opus 5.5 (High):</b> Tier 3 (3-Model Council) and disputed Tier 2 blockers only (explicit <code>thought_level: "high"</code> on Antigravity).</li>
+        <li><b>4. Claude Opus 5.5 (High):</b> Tier 3 (3-Model Council) and disputed Tier 2 blockers only, always via the native <b>Claude harness</b> (<code>claudeAgent</code>, <code>effort: "high"</code>), never on Antigravity.</li>
       </ul>
     </div>
   </div>

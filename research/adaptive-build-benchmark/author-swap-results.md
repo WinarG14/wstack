@@ -25,7 +25,7 @@ Chart source: [`author-swap-experiment.html`](author-swap-experiment.html).
 3. **End-State Optimized Mode (Measured + Opinion):**
    - **Locked Tier 2 Fast Council (regardless of implementor):** **GPT-6.2-Sol (High) + Gemini 4 Neon (High)** paired with Layer 1 DOM Oracle (USD 0) and Layer 2 Blind Visual Critic (`gemini-3.8-flash`, USD 0.05), where the council explicitly cross-checks Layer 1/2 reports against code.
    - **Optimal Implementor + Pipeline:** **GPT-6.2-Sol (High) implementor + `Sol + Neon` Tier 2 Fast Council (Arm G)** delivered the best overall cost-speed-leanliness profile (**USD 3.40** end-to-end, **1,187 s**, `+1,309 / -424` diff, 96.2% defect recall, 0 regressions). **Gemini 4 Neon (High) implementor + `Neon + Sol` Tier 2 Fast Council (Arm E)** was a close second (**USD 3.85**, 1,495 s, 96.3% recall, 12/12 raw scorer, 0 regressions) with slightly stronger initial user interface (UI) polish before review.
-   - **Claude Opus 5.5 (High) role:** Reserve strictly for **Tier 3 (3-Model Council)** and **disputed Tier 2 blockers**. Do not swap Sol or Neon out for Opus on Tier 2.
+   - **Claude Opus 5.5 (High) role:** Reserve strictly for **Tier 3 (3-Model Council)** and **disputed Tier 2 blockers**, always invoked on the native **Claude harness (`claudeAgent`, `effort: "high"`)**, never on Antigravity. Do not swap Sol or Neon out for Opus on Tier 2.
 
 ---
 

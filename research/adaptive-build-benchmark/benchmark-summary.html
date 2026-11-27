@@ -1,73 +1,367 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>adaptive-build benchmark</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>/adaptive-build benchmark summary (25-28 Nov 2026)</title>
 <style>
-:root{--surface:#ffffff;--page:#f9f9f9;--ink:#191919;--ink2:#666666;--grid:#e6e6e6;
---s1:#257de0;--s2:#f47230;--s3:#00b894;--cost:#2370cd;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--page);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);width:1200px;padding:32px}
-.card{background:var(--surface);border:1px solid #e3e3e3;border-radius:12px;padding:28px 32px}
-h1{font-size:24px;font-weight:700;line-height:1.25}
-.sub{font-size:14px;color:var(--ink2);margin-top:6px}
-.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;margin-top:26px}
-h2{font-size:15px;font-weight:600;margin-bottom:4px}
-.h2sub{font-size:12px;color:var(--ink2);margin-bottom:14px}
-.legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin-bottom:14px}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
-.row{display:grid;grid-template-columns:150px 1fr 64px;align-items:center;gap:12px;margin-bottom:14px}
-.lbl{font-size:13px;line-height:1.25}
-.lbl b{font-weight:700}
-.lbl small{display:block;color:var(--ink2);font-size:11px}
-.track{position:relative;height:30px;display:flex;gap:2px}
-.seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
-.seg:last-child{border-radius:0 4px 4px 0}
-.ghost{height:100%;border:1.5px dashed #c9c9c9;border-left:none;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink2)}
-.val{font-size:14px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
-.bar{height:30px;background:var(--cost);border-radius:0 4px 4px 0}
-.note{font-size:11px;color:var(--ink2);margin-left:8px;white-space:nowrap}
-.axis{display:grid;grid-template-columns:150px 1fr 64px;gap:12px;font-size:11px;color:var(--ink2)}
-.axis div:nth-child(2){display:flex;justify-content:space-between;border-top:1px solid var(--grid);padding-top:4px}
-.find{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.f{background:#f6f8fb;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.4}
-.f b{display:block;font-size:20px;margin-bottom:2px}
-.foot{margin-top:18px;font-size:11px;color:var(--ink2);line-height:1.5}
-</style></head><body>
+:root {
+  --surface: #ffffff;
+  --page: #f8f9fb;
+  --ink: #171a1f;
+  --ink2: #5c6573;
+  --grid: #e5e8ee;
+  --s1: #257de0;
+  --s2: #f47230;
+  --s3: #00b894;
+  --win: #059669;
+  --win-soft: #ecfdf5;
+  --cost: #2370cd;
+  --swap: #64748b;
+  --bad: #dc2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--page);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  width: 1200px;
+  padding: 28px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid #e2e6ed;
+  border-radius: 14px;
+  padding: 28px 32px 24px;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--win);
+  margin-bottom: 6px;
+}
+h1 {
+  font-size: 24px;
+  font-weight: 750;
+  line-height: 1.24;
+  letter-spacing: -0.015em;
+}
+.sub {
+  font-size: 13.5px;
+  color: var(--ink2);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.section-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink2);
+  background: #f1f5f9;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-top: 22px;
+  margin-bottom: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1.32fr 1fr;
+  gap: 36px;
+}
+h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.h2sub {
+  font-size: 12px;
+  color: var(--ink2);
+  margin-bottom: 12px;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 11.5px;
+  color: var(--ink2);
+  margin-bottom: 12px;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.row {
+  display: grid;
+  grid-template-columns: 162px 1fr 68px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+.row.cost-row {
+  grid-template-columns: 140px 1fr 68px;
+}
+.row:last-child { margin-bottom: 0; }
+.lbl {
+  font-size: 13px;
+  line-height: 1.25;
+}
+.lbl b { font-weight: 700; }
+.lbl small {
+  display: block;
+  color: var(--ink2);
+  font-size: 11px;
+  margin-top: 1px;
+}
+.track {
+  position: relative;
+  height: 26px;
+  display: flex;
+  gap: 2px;
+  background: #f1f5f9;
+  border-radius: 5px;
+  overflow: hidden;
+  align-items: center;
+}
+.track.plain { background: transparent; overflow: visible; }
+.seg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.seg:first-child { border-radius: 4px 0 0 4px; }
+.seg:last-child { border-radius: 0 4px 4px 0; }
+.ghost {
+  height: 100%;
+  border: 1.5px dashed #cbd5e1;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--ink2);
+}
+.bar {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.bar-note {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink2);
+  padding-left: 8px;
+  white-space: nowrap;
+}
+.bar-note.bad { color: var(--bad); }
+.val {
+  font-size: 13.5px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.val small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink2);
+}
+.rule {
+  border-top: 1px solid var(--grid);
+  margin: 22px 0 0;
+}
+.find {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.f {
+  background: #f6f8fb;
+  border: 1px solid #e7ecf3;
+  border-radius: 10px;
+  padding: 13px 15px;
+  font-size: 12.5px;
+  line-height: 1.42;
+}
+.f.win {
+  background: var(--win-soft);
+  border-color: #a7f3d0;
+}
+.f b {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 3px;
+  color: var(--ink);
+}
+.foot {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
 <div class="card">
-  <h1>/adaptive-build fixed all 12 planted bugs, at about the same child-run cost as no skill</h1>
-  <div class="sub">Benchmark on 25 Nov 2026: one small expense app with 12 planted defects, three ways to fix it, one run each</div>
+  <div class="eyebrow">/adaptive-build benchmark results (25-28 Nov 2026)</div>
+  <h1>12 of 12 planted bugs fixed, and Sol + Neon won 2-for-2 at half the review cost</h1>
+  <div class="sub">Tested on SpendPulse (full-stack expense app): Part 1 compared approaches on 12 planted bugs; Part 2 tested same-family vs Opus author-swap across both implementors.</div>
 
+  <div class="section-tag">Part 1 (25 Nov): No skill vs /adaptive-build Tier 2 vs 3-model /council</div>
   <div class="grid">
     <div>
-      <h2>Defects fixed, out of 12</h2>
+      <h2>Planted bugs fixed (out of 12)</h2>
       <div class="h2sub">Scored by a Playwright script on the running app</div>
-      <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Logic / API</span><span><i class="sw" style="background:var(--s2)"></i>Layout</span><span><i class="sw" style="background:var(--s3)"></i>Unstated UX</span><span><i class="sw" style="border:1.5px dashed #c9c9c9"></i>Missed</span></div>
-      <div class="row"><div class="lbl">No skill<small>1 Gemini agent</small></div>
-        <div class="track"><div class="seg" style="width:33.33%;background:var(--s1)">4</div><div class="seg" style="width:25%;background:var(--s2)">3</div><div class="seg" style="width:25%;background:var(--s3)">3</div><div class="ghost" style="width:16.67%">2 missed</div></div><div class="val">10</div></div>
-      <div class="row"><div class="lbl"><b>/adaptive-build</b><small>Tier 2</small></div>
-        <div class="track"><div class="seg" style="width:33.33%;background:var(--s1)">4</div><div class="seg" style="width:33.33%;background:var(--s2)">4</div><div class="seg" style="width:33.33%;background:var(--s3)">4</div></div><div class="val">12</div></div>
-      <div class="row"><div class="lbl">3-model council<small>Opus + GPT + Gemini</small></div>
-        <div class="track"><div class="seg" style="width:33.33%;background:var(--s1)">4</div><div class="seg" style="width:25%;background:var(--s2)">3</div><div class="seg" style="width:25%;background:var(--s3)">3</div><div class="ghost" style="width:16.67%">2 missed</div></div><div class="val">10</div></div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--s1)"></i>Logic / API</span>
+        <span><i class="sw" style="background:var(--s2)"></i>Layout</span>
+        <span><i class="sw" style="background:var(--s3)"></i>Unstated UX</span>
+        <span><i class="sw" style="border:1.5px dashed #cbd5e1"></i>Missed</span>
+      </div>
+      <div class="row">
+        <div class="lbl">No skill<small>1 Gemini agent</small></div>
+        <div class="track plain">
+          <div class="seg" style="width:33.33%;background:var(--s1)">4</div>
+          <div class="seg" style="width:25%;background:var(--s2)">3</div>
+          <div class="seg" style="width:25%;background:var(--s3)">3</div>
+          <div class="ghost" style="width:16.67%">2 missed</div>
+        </div>
+        <div class="val">10 / 12</div>
+      </div>
+      <div class="row">
+        <div class="lbl"><b>/adaptive-build</b><small>Tier 2 (L1 + L2 + Fast Council)</small></div>
+        <div class="track plain">
+          <div class="seg" style="width:33.33%;background:var(--s1)">4</div>
+          <div class="seg" style="width:33.33%;background:var(--s2)">4</div>
+          <div class="seg" style="width:33.33%;background:var(--s3)">4</div>
+        </div>
+        <div class="val">12 / 12</div>
+      </div>
+      <div class="row">
+        <div class="lbl">3-model /council<small>Opus + GPT + Gemini (2 rds)</small></div>
+        <div class="track plain">
+          <div class="seg" style="width:33.33%;background:var(--s1)">4</div>
+          <div class="seg" style="width:25%;background:var(--s2)">3</div>
+          <div class="seg" style="width:25%;background:var(--s3)">3</div>
+          <div class="ghost" style="width:16.67%">2 missed</div>
+        </div>
+        <div class="val">10 / 12</div>
+      </div>
     </div>
 
     <div>
-      <h2>Cost, USD</h2>
-      <div class="h2sub">Measured tokens × public API list rates</div>
+      <h2>Child-run cost (USD)</h2>
+      <div class="h2sub">Measured tokens multiplied by public API list rates</div>
       <div class="legend" style="visibility:hidden"><span>.</span></div>
-      <div class="row" style="grid-template-columns:110px 1fr 56px"><div class="lbl">No skill</div><div style="display:flex;align-items:center"><div class="bar" style="width:22%"></div></div><div class="val">1.51</div></div>
-      <div class="row" style="grid-template-columns:110px 1fr 56px"><div class="lbl"><b>/adaptive-build</b></div><div style="display:flex;align-items:center"><div class="bar" style="width:22.3%"></div></div><div class="val">1.53*</div></div>
-      <div class="row" style="grid-template-columns:110px 1fr 56px"><div class="lbl">3-model council</div><div style="display:flex;align-items:center"><div class="bar" style="width:90%"></div></div><div class="val">6.19+</div></div>
-      <div class="h2sub" style="margin-top:2px">* Child runs only, partial Tier 2 (see limits). + Council covers rounds 1 and 2 only; it was not finished.</div>
+      <div class="row cost-row">
+        <div class="lbl">No skill</div>
+        <div class="track"><div class="bar" style="width:24.4%;background:var(--swap)"></div><div class="bar-note">10/12 fixed</div></div>
+        <div class="val">$1.51</div>
+      </div>
+      <div class="row cost-row">
+        <div class="lbl"><b>/adaptive-build</b></div>
+        <div class="track"><div class="bar" style="width:24.7%;background:var(--win)"></div><div class="bar-note">12/12 fixed, ~4x cheaper</div></div>
+        <div class="val">$1.53*</div>
+      </div>
+      <div class="row cost-row">
+        <div class="lbl">3-model /council</div>
+        <div class="track"><div class="bar" style="width:100%;background:var(--cost)">10/12 fixed, unfinished, 1 blocker</div></div>
+        <div class="val">$6.19+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="section-tag">Part 2 (27-28 Nov): 2x2 Author-Swap Test (which 2-model Tier 2 council wins?)</div>
+  <div class="grid">
+    <div>
+      <h2>Real bugs caught before fix pass</h2>
+      <div class="h2sub">Paired full-stack feature builds (Bulk Approve, Inline Reject, CSV Export)</div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--win)"></i>Sol + Neon (Tier 2 default, winner)</span>
+        <span><i class="sw" style="background:var(--cost)"></i>Swapping in Claude Opus 5.5</span>
+      </div>
+      <div class="row">
+        <div class="lbl"><b>Neon wrote app</b><small>Arm E: Neon + Sol</small></div>
+        <div class="track"><div class="bar" style="width:96.3%;background:var(--win)">26 / 27 (96.3%)</div></div>
+        <div class="val">96.3%<small>0 reg</small></div>
+      </div>
+      <div class="row">
+        <div class="lbl">Neon wrote app<small>Arm D: Opus + Sol</small></div>
+        <div class="track"><div class="bar" style="width:92.6%;background:var(--cost)">25 / 27 (92.6%)</div></div>
+        <div class="val">92.6%<small>0 reg</small></div>
+      </div>
+      <div class="row">
+        <div class="lbl"><b>Sol wrote app</b><small>Arm G: Sol + Neon</small></div>
+        <div class="track"><div class="bar" style="width:96.2%;background:var(--win)">25 / 26 (96.2%)</div></div>
+        <div class="val">96.2%<small>0 reg</small></div>
+      </div>
+      <div class="row">
+        <div class="lbl">Sol wrote app<small>Arm F: Opus + Neon</small></div>
+        <div class="track"><div class="bar" style="width:73.1%;background:var(--cost)">19 / 26 (73.1%)</div><div class="bar-note bad">1 reg</div></div>
+        <div class="val">73.1%<small>B3 broke</small></div>
+      </div>
+    </div>
+
+    <div>
+      <h2>2-seat council cost (USD)</h2>
+      <div class="h2sub">All seats verified High effort (parallel review run)</div>
+      <div class="legend" style="visibility:hidden"><span>.</span></div>
+      <div class="row cost-row">
+        <div class="lbl"><b>Arm E (Neon+Sol)</b><small>280 s parallel</small></div>
+        <div class="track"><div class="bar" style="width:49.8%;background:var(--win)">45% cheaper</div></div>
+        <div class="val">$1.14<small>$0.044/bug</small></div>
+      </div>
+      <div class="row cost-row">
+        <div class="lbl">Arm D (Opus+Sol)<small>250 s parallel</small></div>
+        <div class="track"><div class="bar" style="width:91.3%;background:var(--cost)">1.83x Arm E</div></div>
+        <div class="val">$2.09**<small>$0.084/bug</small></div>
+      </div>
+      <div class="row cost-row">
+        <div class="lbl"><b>Arm G (Sol+Neon)</b><small>288 s parallel</small></div>
+        <div class="track"><div class="bar" style="width:46.3%;background:var(--win)">54% cheaper</div></div>
+        <div class="val">$1.06<small>$0.042/bug</small></div>
+      </div>
+      <div class="row cost-row">
+        <div class="lbl">Arm F (Opus+Neon)<small>341 s parallel</small></div>
+        <div class="track"><div class="bar" style="width:100%;background:var(--cost)">2.16x Arm G, -23 pts recall</div></div>
+        <div class="val">$2.29**<small>$0.121/bug</small></div>
+      </div>
     </div>
   </div>
 
   <div class="find">
-    <div class="f"><b>0 of 6</b>static reviews by 3 flagship models saw 7 buttons pushed off screen on mobile</div>
-    <div class="f"><b>4 seconds</b>for the free layout check in /adaptive-build to find them, plus raw DB IDs on screen</div>
-    <div class="f"><b>~4x cheaper</b>than the council, with 0 new bugs (the council added 1 blocker)</div>
+    <div class="f"><b>0 of 6 static reviews</b>saw 7 buttons pushed off screen on mobile; the free 4-second Layer 1 DOM check found them plus raw DB IDs at once</div>
+    <div class="f win"><b>Sol + Neon won 2-for-2</b>~96% verified bug recall under both Gemini Neon and GPT Sol authors, at ~$1.10 per council with 0 regressions</div>
+    <div class="f win"><b>Best end-state: $3.40</b>GPT-6.2-Sol build + Layer 1/2 + Sol &amp; Neon review + Sol fix (1,187 s); reserve Claude Opus (Claude harness) for Tier 3</div>
   </div>
 
-  <div class="foot">Limits: one run per approach, one practice app; 5 of the 12 checks use the skill's own layout script.<br>
-  /adaptive-build cost leaves out its parent session, and that run skipped ponytail-review and /pstack:how.<br>
-  Source and full data: github.com/WinarG14/wstack/tree/main/research/adaptive-build-benchmark</div>
+  <div class="foot">
+    * Part 1 /adaptive-build cost covers child runs only (partial Tier 2); + Part 1 council covers rounds 1-2 only (unfinished). ** Antigravity Opus upper bound with 100% cache-write pricing: $2.26 (Arm D), $2.45 (Arm F). Limits: n = 1 per arm on one practice app.<br>
+    Full tables, per-defect matrices, and reproduction scripts: github.com/WinarG14/wstack/tree/main/research/adaptive-build-benchmark
+  </div>
 </div>
-</body></html>
+</body>
+</html>

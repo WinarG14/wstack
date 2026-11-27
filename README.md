@@ -34,7 +34,7 @@ Good skill packs exist. The hard part is knowing **which one to run, and when to
 
 We ran one fault-seeded benchmark: a small expense app with 12 planted defects (4 logic/API, 4 layout, 4 unstated UX). Full write-up, per-seat token table and limits: [`research/adaptive-build-benchmark/`](research/adaptive-build-benchmark/README.md).
 
-![Benchmark summary: /adaptive-build fixed 12 of 12 planted bugs at USD 1.53; no skill and the 3-model council each fixed 10](research/adaptive-build-benchmark/benchmark-summary.png)
+![Benchmark summary: /adaptive-build fixed 12 of 12 planted bugs at USD 1.53, and Sol + Neon won 2-for-2 across both implementors at roughly half the council cost](research/adaptive-build-benchmark/benchmark-summary.png)
 
 | | No skill | `/adaptive-build` (Tier 2) | Full 3-model `/council` |
 |---|---|---|---|

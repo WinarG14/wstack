@@ -109,5 +109,8 @@ Design notes behind the skill (expert terms, neighbour fields, the sharpened bri
 
 Because Arm B above audited a pre-seeded app before Neon wrote code, we ran a controlled 2x2 follow-up testing **same-family self-review bias vs swapping in Claude Opus 5.5 (High)** across both **Gemini 4 Neon (High)** and **GPT-6.2-Sol (High)** implementors on fresh full-stack feature builds (Bulk Approve, Inline Reject with required reason, and filtered formula-safe CSV export).
 
+![2x2 Author-Swap Experiment Summary](author-swap-experiment.png)
+
 - **Winner under both authors:** **GPT-6.2-Sol (High) + Gemini 4 Neon (High)** achieved **96.3%** recall on Neon-authored code (USD 1.14 council vs USD 2.09 for Opus + Sol) and **96.2%** recall on Sol-authored code (USD 1.06 council vs USD 2.29 and 73.1% recall for Opus + Neon, which also introduced 1 regression).
+- **Best end-state mode:** GPT-6.2-Sol (High) build + Layer 1/2 + Sol & Neon Tier 2 Fast Council + Sol fix (**USD 3.40** end-to-end, 0 regressions).
 - Full per-defect matrices, 16-run token accounting, and end-state architecture: [`author-swap-results.md`](author-swap-results.md) and [`author-swap-experiment.html`](author-swap-experiment.html).
