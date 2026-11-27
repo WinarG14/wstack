@@ -7,7 +7,7 @@ Agent skills I use every day, cleaned up so anyone can use them. They work in Cl
 
 | Skill | Say | What it does |
 |---|---|---|
-| [`adaptive-build`](skills/adaptive-build/SKILL.md) | "/adaptive-build &lt;task&gt;" or "/adaptive-build review &lt;PR&gt;" | Picks the right amount of rigor for each change, then runs **one tool per job** from tstack, pstack and ponytail. Adds a USD 0 layout check and a blind visual critic, so UI bugs get caught before you look. |
+| [`adaptive-build`](skills/adaptive-build/SKILL.md) | "/adaptive-build &lt;task&gt;" or "/adaptive-build review &lt;PR&gt;" (plugin: `/wstack:adaptive-build`) | Picks the right amount of rigor for each change, then runs **one tool per job** from tstack, pstack and ponytail. Adds a USD 0 layout check and a blind visual critic, so UI bugs get caught before you look. |
 
 ## `adaptive-build`: one conductor for tstack, pstack and ponytail
 
@@ -49,13 +49,27 @@ Caveats: one run per arm on one synthetic app. 5 of the 12 checks use the skill'
 
 ## Install
 
+**Claude Code plugin (recommended, gets updates):**
+
+```
+/plugin install wstack --marketplace WinarG14/wstack
+```
+
+Older Claude Code (before 2.1.275): `/plugin marketplace add WinarG14/wstack`, then `/plugin install wstack@wstack`. As a plugin, the skill is `/wstack:adaptive-build`.
+
+**Turn on auto-update once:** run `/plugin`, open **Marketplaces**, select `wstack`, and turn on auto-update. Claude Code keeps it off for marketplaces outside Anthropic's, and a marketplace cannot turn it on for you. The plugin has no fixed version, so every push to `main` reaches you.
+
+**Codex plugin:** this repo also ships `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`.
+
+**Or copy the files:**
+
 ```bash
 git clone https://github.com/WinarG14/wstack
 cp -R wstack/skills/* ~/.claude/skills/   # Claude Code
 cp -R wstack/skills/* ~/.codex/skills/    # Codex
-# UI layers only: Playwright, globally or in your project
-npm i -g playwright && npx playwright install chromium
 ```
+
+**UI layers only:** `npm i -g playwright && npx playwright install chromium` (or install Playwright in your project).
 
 `load_playwright.mjs` finds Playwright in the current project, `NODE_PATH`, or the global npm root. It uses Playwright's Chromium, or your installed Chrome if Chromium is not downloaded.
 

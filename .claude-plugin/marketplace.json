@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wstack",
+  "description": "Agent skills I use every day, cleaned up so anyone can use them.",
+  "owner": {
+    "name": "WinarG14",
+    "url": "https://github.com/WinarG14"
+  },
+  "plugins": [
+    {
+      "name": "wstack",
+      "description": "adaptive-build: picks the right rigor tier for each change, runs one tool per job from tstack, pstack and ponytail, and checks the rendered UI with a free layout check and a blind visual critic.",
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}

@@ -164,13 +164,13 @@ def scan_caller_fanout(repo: Path, candidate_files: List[str]) -> Dict[str, List
         stem = p.stem if p.stem not in ("index", "__init__", "main", "mod", "app", "server") else p.parent.name
         if not stem or len(stem) < 4:
             continue
-        rc, out = run_git(repo, ["grep", "-l", "-F", stem])
+        rc, out = run_git(repo, ["grep", "-z", "-l", "-F", stem])
         if rc != 0 or not out:
             continue
         own_mod = module_bucket(f)
         caller_mods: Set[str] = set()
-        for hit in out.splitlines():
-            if hit == f or is_test_or_doc(hit) or Path(hit).suffix.lower() not in (CODE_EXTS | UI_EXTS):
+        for hit in out.split("\0"):
+            if not hit or hit == f or is_test_or_doc(hit) or Path(hit).suffix.lower() not in (CODE_EXTS | UI_EXTS):
                 continue
             if module_bucket(hit) != own_mod:
                 caller_mods.add(module_bucket(hit))
@@ -258,7 +258,7 @@ def recommend(args: argparse.Namespace) -> Dict:
         top = ", ".join(f"{k} ({len(v)} modules)" for k, v in list(caller_fanout.items())[:3])
         tier2_reasons.append(f"High caller fan-out: {top}")
         risk_dims += 1
-    elif shared_files and (len(non_test_files) >= 2 or not args.no_git_diff):
+    elif shared_files:
         tier2_reasons.append(f"Touches shared modules: {', '.join(shared_files[:4])}")
 
     if boundary_hits:

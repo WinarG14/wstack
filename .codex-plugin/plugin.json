@@ -1,0 +1,27 @@
+{
+  "name": "wstack",
+  "version": "0.2.0",
+  "description": "adaptive-build: risk-tiered build and review orchestrator for tstack, pstack and ponytail, with a free DOM layout check and a blind visual critic.",
+  "author": {
+    "name": "WinarG14",
+    "url": "https://github.com/WinarG14"
+  },
+  "homepage": "https://github.com/WinarG14/wstack",
+  "repository": "https://github.com/WinarG14/wstack",
+  "license": "MIT",
+  "keywords": ["code-review", "orchestration", "pstack", "tstack", "ponytail", "ui-testing"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "wstack",
+    "shortDescription": "Right-sized build and review rigor",
+    "longDescription": "adaptive-build triages each change into 3 risk tiers, runs one tool per job with hard round caps, and checks rendered UI with a free layout check and a blind visual critic.",
+    "developerName": "WinarG14",
+    "category": "Coding",
+    "capabilities": ["Instructions"],
+    "websiteURL": "https://github.com/WinarG14/wstack",
+    "defaultPrompt": [
+      "/adaptive-build fix this bug",
+      "/adaptive-build review this branch"
+    ]
+  }
+}

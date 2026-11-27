@@ -1,0 +1,13 @@
+{
+  "name": "wstack",
+  "description": "adaptive-build: risk-tiered build and review orchestrator for tstack, pstack and ponytail, with a free DOM layout check and a blind visual critic.",
+  "author": {
+    "name": "WinarG14",
+    "url": "https://github.com/WinarG14"
+  },
+  "homepage": "https://github.com/WinarG14/wstack",
+  "repository": "https://github.com/WinarG14/wstack",
+  "license": "MIT",
+  "keywords": ["code-review", "orchestration", "pstack", "tstack", "ponytail", "ui-testing"],
+  "skills": "./skills/"
+}
