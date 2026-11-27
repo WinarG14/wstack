@@ -47,6 +47,28 @@ The short version: the same cost as no skill, all 12 fixed, and about 4x cheaper
 
 Caveats: one run per arm on one synthetic app. 5 of the 12 checks use the skill's own geometry script. The `/adaptive-build` cost leaves out its parent session, and that run skipped `ponytail-review` and `/pstack:how`. Read the [limits](research/adaptive-build-benchmark/README.md#limits-read-before-you-quote-the-numbers) before you quote it.
 
+## Credits: the stacks it harmonizes, and how
+
+`adaptive-build` writes none of these tools. It is the layer that decides **which one runs, when, and when to stop**. Each tool keeps one job, so no two tools do the same work on one change. All credit for the tools goes to their authors.
+
+| Stack | By | What `adaptive-build` uses it for |
+|---|---|---|
+| [ponytail](https://github.com/DietrichGebert/ponytail) | Dietrich Gebert | `ponytail` writes the smallest complete diff on **every** tier. `ponytail-review` is the Tier 1 review and the cheap trim before any council on Tier 2 and 3. |
+| [tstack](https://github.com/t3dotgg/tstack) | Theo Browne ([t3dotgg](https://github.com/t3dotgg)) | `sol-loop` is the Tier 1 option for tricky logic (max 2 rounds). `council` is the cross-provider review: 2 models on Tier 2, 3 models on Tier 3 (max 3 rounds). The repo layout of wstack copies tstack. |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) | Lauren Tan ([poteto](https://github.com/poteto)), Cursor | Tier 2: `how` (real callers and data owner), `why` (legacy code), `reframe` + `sharpen` (fuzzy briefs), `blast-radius` (prove the one safety fact by running code). Tier 3: `architect` (2 competing sketches), `statechart` (async and race logic), `interrogate` (repro-only review), `figure-it-out` (long unattended runs). Any tier: `benchmark-checklist` for numbers, `correct` when a bug class repeats. `arena` is skipped unless you ask. |
+| [taste-skill](https://github.com/leonxlnx/taste-skill) | Leon Lin ([Leonxlnx](https://github.com/Leonxlnx)) | Optional `design-taste-frontend` for visual craft on marketing and brand pages. |
+| [T3 Code](https://github.com/pingdotgg/t3code) | [Ping.gg](https://github.com/pingdotgg) | `delegate_task` runs the council seats on other providers' models. |
+
+How the pieces fit on one change:
+
+1. **Triage (bundled, USD 0):** `adaptive_triage.py` reads the diff and picks Tier 1, 2 or 3.
+2. **Build:** `ponytail` always. On Tier 2 and 3, pstack runs first (`how`, then `architect` / `statechart` on Tier 3).
+3. **Review:** `ponytail-review` trims, then `sol-loop` (Tier 1) or `council` (Tier 2 and 3), then `blast-radius` or `interrogate` when the risk is in back-end or shared code.
+4. **Look at the screen (bundled):** Layer 1 layout check and the Layer 2 blind visual critic, when UI files change.
+5. **Stop rules:** hard round caps, and after 2 failed fixes it stops and tests the hidden assumption.
+
+The UX critic rubric uses [Nielsen's 10 usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/). The cheap-first routing follows the cascade idea in [FrugalGPT](https://arxiv.org/abs/2305.05176) and [RouteLLM](https://arxiv.org/abs/2406.18665).
+
 ## Install
 
 **Claude Code plugin (recommended, gets updates):**
