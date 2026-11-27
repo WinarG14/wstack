@@ -21,7 +21,7 @@ Good skill packs exist. The hard part is knowing **which one to run, and when to
    | Tier | When | Build | Review |
    |---|---|---|---|
    | 1 LEAN (~USD 0.5-3) | 1-4 files, one module, no boundary | `ponytail` smallest diff | `ponytail-review` **or** one `sol-loop` (max 2 rounds) |
-   | 2 TARGETED (~USD 2.5-6) | shared code, API/DB/auth, bug fix, async, 5-14 files | `/pstack:how` for real callers -> 5-bullet design lock -> `ponytail` (GPT-6.2-Sol High or Gemini 4 Neon High) | `ponytail-review` trim -> **2-model fast council locked to GPT-6.2-Sol High + Gemini 4 Neon High regardless of implementor** (max 2 rounds, cross-checking Layer 1/2) -> `/pstack:blast-radius` when risky |
+   | 2 TARGETED (~USD 2.5-6) | shared code, API/DB/auth, bug fix, async, 5-14 files | `/pstack:how` for real callers -> 5-bullet design lock -> `ponytail` (builds with your current model) | `ponytail-review` trim -> **2-model fast council locked to GPT-6.2-Sol High + Gemini 4 Neon High regardless of implementor** (max 2 rounds, cross-checking Layer 1/2) -> `/pstack:blast-radius` when risky |
    | 3 FULL (~USD 12-25) | 15+ files, state machines, security/money/migration, or 2 failed fixes | + `/pstack:architect`, `/pstack:statechart` | + full 3-model `/council` (Sol + Neon + Claude Opus 5.5 High, cap 3 rounds) or `/pstack:interrogate` |
 
    It escalates by itself when a Tier 1 change touches shared code or a contract. After two failed fixes in the same place it stops patching and tests the hidden assumption.
